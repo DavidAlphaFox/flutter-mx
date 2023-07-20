@@ -5,6 +5,7 @@
     ["package:flutter/material.dart" :as m]
     ["package:flutter/painting.dart" :as p]
     [clojure.string :as str]
+    [tilton.mx.base :refer [wtrx dprn dp dpx]]
     [tilton.fmx.api :as fx
      :refer [scaffold app-bar text center column hero material-app
              container row expanded icon padding in-my-context]]))
@@ -52,15 +53,18 @@
       (text "41"))))
 
 (defn button-column [color icon label]
-  (column {:mainAxisSize      m/MainAxisSize.min
-           :mainAxisAlignment m/MainAxisAlignment.center}
-    {:name :button-col}
-    (fx/icon {:icon icon :color color})
-    (container {:margin (m/EdgeInsets.only .top 8)}
-      (text {:style (fx/text-style {:fontSize   12
-                                    :fontWeight m/FontWeight.w400
-                                    :color      color})}
-        label))))
+  (fx/theme {:data (m/ThemeData .primarySwatch m.Colors/yellow)}
+    (column {:mainAxisSize      m/MainAxisSize.min
+             :mainAxisAlignment m/MainAxisAlignment.center}
+      {:name :button-col}
+      (fx/icon {:icon icon :color color #_ (in-my-context [me ctx]
+                                    (dp :icon-using-ctx m.Colors/yellow (.-primaryColor (m/Theme.of ctx)))
+                                    (.-primaryColor (m/Theme.of ctx)))})
+      (container {:margin (m/EdgeInsets.only .top 8)}
+        (text {:style (fx/text-style {:fontSize   12
+                                      :fontWeight m/FontWeight.w400
+                                      :color      color})}
+          label)))))
 
 (defn campground-desc []
   (str/replace
