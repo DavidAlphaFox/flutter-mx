@@ -37,4 +37,4 @@
     [example.eg.flutter-tts :as tts]))
 
 (defn select []
-  (desugared/make-app))
+  (counter/make-app))
