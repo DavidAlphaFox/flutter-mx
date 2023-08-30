@@ -26,14 +26,14 @@
        (app-bar {:backgroundColor (fx/in-my-context [me ctx]
                                     (.-inversePrimary (.-colorScheme (m/Theme.of ctx))))
                  :title           (m/Text "Flutter/MX Counter Classic")})
-       :floatingActionButton (floating-action-button
+       #_#_ :floatingActionButton (floating-action-button
                                {:onPressed (as-dart-callback []
                                              (mswap! (fm* :scaffo) :counter inc))
                                 :tooltip   "Increment"}
                                (m/Icon m/Icons.add))}
       {:name    :scaffo
        :counter (cI 0)}
-      (center
+      #_ (center
         (column {:mainAxisAlignment m/MainAxisAlignment.center}
           (text "We have pushed the button this many times:")
           (text
