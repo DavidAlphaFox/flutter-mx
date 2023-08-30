@@ -61,7 +61,7 @@
   and propagation."
 
   [c debug-id ensurer]
-  (wtrx [0 1000 nil :EVIC-ENTRY debug-id (cinfo c)]
+  (wtrx [0 1000 :EVIC-ENTRY debug-id (cinfo c)]
     (dpc c :evic :evic-entry debug-id)
     (cond
       ; --------------------------------------------------
@@ -183,12 +183,16 @@
   (do
     ;; cty/with-cdbg (and (= :style (c-prop c)) (= :counter (c-mname c)))
     (dpx c :calcnset-sees!!!!!!!!!!!!!!!!!!! dbgid dbgdata @c)
+    (dp :calcnset-sees!!!!!!!!!!!!!!!!!!! dbgid dbgdata @c)
     (let [[raw-value propagation-code] (calculate-and-link c dbgid)]
       (dpc c :cnset :calcnset-raw!!! raw-value :fut? (dart/is? raw-value Future) :opti? (c-optimized-away? c)
         #_#_:meta-mw (meta (c-me c)))
 
+      (dp :cnset :calcnset-raw!!! raw-value :fut? (dart/is? raw-value Future) :opti? (c-optimized-away? c))
+
       (cond
         (c-async? c) (let [cfo (cinfo c true)]
+                       (dp :c-awakening-async!!!!! (c-state c) (c-pulse c) @+pulse+ (cinfo c))
                        (chk (or (nil? raw-value)            ;; someday support other default future cell values, mebbe :pending
                               (dart/is? raw-value Future))
                          (str "cnset-future got non future: " raw-value dbgid dbgdata))
@@ -221,6 +225,7 @@
                            (c-value-assume c nil propagation-code))
                          (c-value-assume c nil propagation-code)))
         :else (when-not (c-optimized-away? c)
+                (dp :not-c-opti!!!!!!!!! )
                 (chk (map? (deref c)) "calc-n-set")
                 ;; this check for optimized-away? arose because a rule using without-c-dependency
                 ;; can be re-entered unnoticed since that "clears" *call-stack*. If re-entered, a subsequent
@@ -228,6 +233,7 @@
                 ;; as part of the opti-away processing.
                 ;;(trx :calc-n-set->assume raw-value)
                 (c-value-assume c raw-value propagation-code)
+                (dp :cval-assumed!!!!!! )
                 (chk (or (map? (deref c))
                        (c-optimized-away? c)) "calc-n-set post CVASS deref c not map or opti"))))))
 
@@ -294,7 +300,7 @@
 ;;; --- awakening ------------------------------------
 
 (defn c-awaken [c]
-  (do ;; try
+  (wtrx [0 1000 :C_AWK_ENTRY (cinfo c)]
     (cond
       (c-formula? c)
       (cond
@@ -303,8 +309,9 @@
 
         :else (binding [*depender* nil]
                 (when (not (= (c-state c) :awake))
-                  ;(dp :c-awakening!!!!! (c-state c) (c-pulse c) @+pulse+ (cinfo c))
-                  (calculate-and-set c :fn-c-awken nil))))
+                  (dp :c-awakening!!!!! (c-state c) (c-pulse c) @+pulse+ (cinfo c))
+                  (calculate-and-set c :fn-c-awken nil)
+                  (dp :c-awakened!!!!! (c-state c) (c-pulse c) @+pulse+ (cinfo c)))))
 
       (c-ref? c)
       (do
@@ -339,8 +346,13 @@
 (defn md-prop-value-store [me prop value]
   (chk me)
   (chk (atom? me))
-  ;(trx :mdsv-store prop (flz value))
-  (rmap-set! [prop me] value))
+  (dp :mdsv-store prop value)
+  (let [sv (rmap-set! [prop me] value)]
+    (dp :mdsv-stored-1 prop)
+    (dp :mdsv-stored-2 prop value)
+    (dp :mdsv-stored-final prop sv)
+    sv)
+  )
 
 (defn c-value-assume
   "The Cell assumes a new value at awakening, on creset!, or
@@ -359,7 +371,7 @@
                     " atom? " (atom? c)
                     " map? " (when (atom? c) (map? (deref c)))
                     " deref? " (when (atom? c) (deref c))))
-  ;; (println :cva-entry (c-prop c) new-value)
+  (println :cva-entry (c-prop c) new-value)
   (do                                                       ;; (wtrx (0 100 :cv-ass (:prop @c) new-value)
     (prog1 new-value                                        ;; sans doubt
       (without-c-dependency
@@ -371,16 +383,19 @@
           ;; even if no news at least honor the reset!
           ;;
           (dpc c :cnset :CVASS_SETS!!!! new-value)
+          (dp :cnset :CVASS_SETS!!!! new-value)
           (rmap-set! [:value c] new-value)
           (rmap-set! [:state c] :awake)
           (rmap-set! [:pulse-last-changed c] @+pulse+)
 
-          #_(trx :new-vlue-installed (c-prop c) new-value (:value c))
+          (dp :new-vlue-installed (c-prop c) new-value (:value c))
           ;;
           ;; --- model maintenance ---
           (when (and (c-model c)                            ; redundant with next check, but logic is impeccable
                   (not (c-synaptic? c)))                    ; synapses just manage cell state, no model property
             (md-prop-value-store (c-model c) (c-prop c) new-value))
+
+          (dp :CVASS_STored!!! new-value)
 
           (c-pulse-update c :slotv-assume)
 

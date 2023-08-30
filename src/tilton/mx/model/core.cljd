@@ -570,7 +570,7 @@
    (when force?
      (when (not= :never (:fx$quiesce (meta me)))
        (when *md-quiesce-log?* (dp :md-quiescing (minfo me) :meta (meta me)))
-       (wtrx [0 999 nil :mdq-entry (minfo me)]
+       (wtrx [0 999  :mdq-entry (minfo me)]
          (binding [*md-quiescing* true
                    *md-quiesce-log?* false]
            (cond

@@ -214,7 +214,7 @@
 (defmacro alert-dialog [fx-props mx-props & children]
   `(tilton.fmx.factory/k1-content-stateless m/AlertDialog ~fx-props ~mx-props ~@children))
 
-(deftags tilton.fmx.factory/childless-stateful
+(deftags tilton.fmx.factory/childless-stateless
   (slider m/Slider)
   (dropdown-button m/DropdownButton)
   (future-builder m/FutureBuilder)
@@ -238,7 +238,7 @@
 (deftag tilton.fmx.factory/k1-home-stateful material-app m/MaterialApp)
 (deftag tilton.fmx.factory/konly-for-builder-stateless layout-kid-builder w/LayoutBuilder)
 
-(deftags tilton.fmx.factory/k1-child-stateful
+(deftags tilton.fmx.factory/k1-child-stateless
   (popup-menu-button m/PopupMenuButton)
   (popup-menu-item m/PopupMenuItem)
   (opacity! m/Opacity)
@@ -257,7 +257,7 @@
   (animated-builder m/AnimatedBuilder)
   (animated-container m/AnimatedContainer))
 
-(deftag tilton.fmx.factory/kids->prop-stateful
+(deftag tilton.fmx.factory/kids->prop-stateless
   navigation-rail m/NavigationRail :destinations)
 
 (deftags tilton.fmx.factory/children-stateless

@@ -19,7 +19,7 @@
 ;;; attributes such as :home and :body from a solo (implicit) child
 ;;; with widgets that work closer to the Flutter, and make the properties explicit.
 
-(deftags tilton.fmx.factory/childless-stateful
+(deftags tilton.fmx.factory/childless-stateless
   (material-app m/MaterialApp)
   (scaffold m/Scaffold))
 

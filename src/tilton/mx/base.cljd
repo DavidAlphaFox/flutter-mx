@@ -71,6 +71,7 @@
 
 (defn dp [& bits]
   (when-not false                                           ;; (nil? (first bits))
+    (dart:core/print "")
     (dart:core/print (str/join " - " (list*                 ;:DPR
                                        ;*trdeep*
                                        (apply str (repeat *trdeep* "."))
