@@ -125,30 +125,36 @@
 (def ^:dynamic *fx-building?* false)
 
 (defn mark-rebuild [^w/Element elt me cell]
-  (dpx :MNBuild-entry (minfo me) elt (deref *fmx-debugger*))
+  (dp :MNBuild-entry (minfo me) #_#_ elt (deref *fmx-debugger*))
   (when-let [cb (deref *fmx-debugger*)]
     (cb :mark-rebuild-unless-defunct {:element elt :cell cell}))
 
   (when (not (.-debugIsDefunct elt))
-    (dpx :MNBuild-MNB!!! (minfo me))
+    (dp :MNBuild-MNB-BAM!!! (minfo me))
     (.markNeedsBuild elt)))
 
 (defn trigger-build [me cell]
   (when-not *fx-building?*
     (if-let [^State? state (mget? me :fx$state)]
-      (do (dpx :FXDWO-settingimmediatestate prop new-value (minfo me) (.-mounted state) (cinfo cell))
-          (trigger-state state me))
+      (do (dp :FXDWO-settingimmediatestate (minfo me) (.-mounted state) (cinfo cell))
+          (trigger-state state me)
+          ;;; HACK
+          (if-let [^w/Element elt (fx-ctx me)]
+            (do (dp :FXDWO-direct-MNB (minfo me))
+                (mark-rebuild elt me cell))
+            (dp :FXDWO-NOT-MNBING-contextless (minfo me))))
       (do
         (if-let [^w/Element elt (fx-ctx me)]
-          (do (dpx :FXDWO-direct-MNB prop new-value (minfo me))
+          (do (dp :FXDWO-direct-MNB (minfo me))
               (mark-rebuild elt me cell))
-          (dpx :FXDWO-NOT-MNBING-contextless prop new-value (minfo me)))
+          (dp :FXDWO-NOT-MNBING-contextless (minfo me)))
         (trigger-state-above (mpar))))))
 
 (defn trigger-state-above [me]
   (when me
+    (dp :trying-above (minfo me))
     (if-let [^State? state (mget? me :fx$state)]
-      (do (dpx :FXDWO-settingimmediatestate prop new-value (minfo me) (.-mounted state))
+      (do (dp :trig-state-above-bingo  (minfo me) (.-mounted state))
           (trigger-state state me))
       (trigger-state-above (mpar)))))
 
@@ -157,7 +163,7 @@
    (trigger-state state nil))
   ([^State state me]
    (if (.-mounted state)
-     (do (dpx :TRG-STATE-setting-state!!!! state (minfo me))
+     (do (dp :TRG-STATE-setting-state-BAM!!!! state (minfo me))
          (.setState state (fn [] (do))))
      (dp :TRG-STATE_STATE_IGNORING_UNMOUNTED state (minfo me)))))
 
