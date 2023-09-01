@@ -131,7 +131,7 @@
               ;;(dp :fx-render-records (minfo fx) ctx)
               ;; nope (fxf/record-fx$ctx fx ctx)
               (let [g (gen fx ctx)]
-                (dpx :render-genned!!! g)
+                (dp :render-genned!!! g)
                 (rmap-meta-set! [:fx-dom fx] g)
                 g)))))
 
@@ -224,6 +224,7 @@
 
 ;; todo does snackbar still need this custom macro?
 (deftag tilton.fmx.factory/make-fx-snackbar snack-bar m/SnackBar)
+(deftag tilton.fmx.factory/konly-param1-stateful text! m/Text)
 (deftag tilton.fmx.factory/konly-param1-stateless text m/Text)
 (deftag tilton.fmx.factory/prop-param1-childless-stateless icon m/Icon :icon)
 

@@ -21,7 +21,7 @@
               .colorScheme (m/ColorScheme.fromSeed
                              .seedColor m/Colors.deepPurple)
               .useMaterial3 true)}
-    (do (dp :building-scaffold)
+    (do (dp :----------------building-scaffold)
         (scaffold
           {:appBar
            (app-bar {:backgroundColor (fx/in-my-context [me ctx]
@@ -34,11 +34,15 @@
                                    (m/Icon m/Icons.add))}
           {:name    :scaffo
            :counter (cI 0)}
-          (center
+          (do (dp :----------------building-scaffo-kids)
+              (let [c (center
             (column {:mainAxisAlignment m/MainAxisAlignment.center}
-              (text "We have pushed the button this many times:")
+              ;; HHACK (text "We have pushed the button this many times:")
               (text
                 {:style (in-my-context [me ctx]
                           (.-headlineMedium (.-textTheme (m/Theme.of ctx))))}
-                (do (dp :building-ctr-text)
-                    (str (mget (fasc :scaffo) :counter))))))))))
+                {:name :counter-text}
+                (do (dp :---------------building-ctr-text)
+                    (str (mget (fasc :scaffo) :counter))))))]
+            (dp :center-returned c)
+            c))))))
