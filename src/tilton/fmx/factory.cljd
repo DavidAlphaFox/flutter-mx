@@ -35,7 +35,7 @@
 
 (defn call-with-flutter-ref [me ctx factory]
   (let [ref (factory)]
-    ;; (dp :cwref!!!!!! ref)
+    (dp :built!!! (minfo me))
     (tilton.fmx.factory/ctx-check me ctx)
     (rmap-meta-set! [:fx$flutter-ref me] ref)
     ref))
@@ -49,8 +49,8 @@
 ;;; --- ctx tracking ----------------------
 
 (defn record-fx$ctx [me ctx]
-  (dp :record-CTX! (minfo me) ctx)
-  (dp :record-CTX!-state (minfo me) (.-state ctx))
+  ;(dp :record-CTX! (minfo me) ctx)
+  ;(dp :record-CTX!-state (minfo me) (.-state ctx))
   (mx/rmap-meta-set! [:fx$ctx me] ctx))
 
 (defn ctx-check
@@ -131,7 +131,7 @@
     (cb :mark-rebuild-unless-defunct {:element elt :cell cell}))
 
   (when (not (.-debugIsDefunct elt))
-    (dp :NOT-MNBuild (minfo me) :ELEMENT elt)
+    (dpx :NOT-MNBuild (minfo me) :ELEMENT elt)
     #_ (.markNeedsBuild elt)))
 
 (defn trigger-build [me cell]

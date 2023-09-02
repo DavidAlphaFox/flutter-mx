@@ -131,7 +131,7 @@
               ;;(dp :fx-render-records (minfo fx) ctx)
               ;; nope (fxf/record-fx$ctx fx ctx)
               (let [g (gen fx ctx)]
-                (dp :render-genned!!! g)
+                (dpx :render-genned!!! g)
                 (rmap-meta-set! [:fx-dom fx] g)
                 g)))))
 

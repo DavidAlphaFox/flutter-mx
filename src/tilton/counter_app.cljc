@@ -35,14 +35,12 @@
           {:name    :scaffo
            :counter (cI 0)}
           (do (dp :----------------building-scaffo-kids)
-              (let [c (center
-            (column {:mainAxisAlignment m/MainAxisAlignment.center}
-              ;; HHACK (text "We have pushed the button this many times:")
-              (text
-                {:style (in-my-context [me ctx]
-                          (.-headlineMedium (.-textTheme (m/Theme.of ctx))))}
-                {:name :counter-text}
-                (do (dp :---------------building-ctr-text)
-                    (str (mget (fasc :scaffo) :counter))))))]
-            (dp :center-returned c)
-            c))))))
+              (center
+                (column {:mainAxisAlignment m/MainAxisAlignment.center}
+                  ;; HHACK (text "We have pushed the button this many times:")
+                  (text
+                    {:style (in-my-context [me ctx]
+                              (.-headlineMedium (.-textTheme (m/Theme.of ctx))))}
+                    {:name :counter-text}
+                    (do (dp :---------------building-ctr-text)
+                        (str (mget (fasc :scaffo) :counter)))))))))))
