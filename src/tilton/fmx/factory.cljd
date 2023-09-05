@@ -35,7 +35,7 @@
 
 (defn call-with-flutter-ref [me ctx factory]
   (let [ref (factory)]
-    (dp :built!!! (minfo me))
+    (dp :flutter-ref-built!!! (minfo me) (dart/is? ref m/Widget) ref)
     (tilton.fmx.factory/ctx-check me ctx)
     (rmap-meta-set! [:fx$flutter-ref me] ref)
     ref))
@@ -60,6 +60,7 @@
      (nil? (fx-ctx me))
      (do
        (dpx :CTX-CHECK-NIL (str "<<" fx-class ">> NIL so adopting build ctx: <" ctx))
+       (dpx :CTX-CHECK-NIL-element (dart/is? ctx w/Element))
        (record-fx$ctx me ctx))
 
      (= ctx (fx-ctx me))
@@ -80,9 +81,13 @@
     (init state ~'me)))
 
 (defn record-fx$state [me state]
-  (dp :recording-state (minfo me) cty/*defer-changes* cty/*within-integrity*)
+  (dp :recording-state (minfo me) (fn? state) #_#_cty/*defer-changes* cty/*within-integrity*)
   (mx/with-cc :reco-state
     (mx/mset! me :fx$state state)))
+
+(defn record-fx$state-setter [me state-setter]
+  (dp :recording-builder-state-setter (minfo me) (fn? state-setter) state-setter)
+  (rmap-meta-set! [:fx$state-setter me] state-setter))
 
 (defn fx-state-nearest [me]
   (dpx :state-nearest-entry (tilton.mx.cell.base/minfo me))
@@ -90,6 +95,7 @@
     (if-let [st ^State? (mget? me :fx$state)]
       (do (dpx :nearest-st-bingo-from (minfo me))
           st)
+      ;; todo try state-setter
       (when-let [st (fx-state-nearest (mx/mpar))]
         (dpx :got-nearest-st-JIT st (tilton.mx.cell.base/minfo me))
         ;; todo memoize instead
@@ -132,31 +138,26 @@
 
   (when (not (.-debugIsDefunct elt))
     (dpx :NOT-MNBuild (minfo me) :ELEMENT elt)
-    #_ (.markNeedsBuild elt)))
+    #_(.markNeedsBuild elt)))
 
 (defn trigger-build [me cell]
   (when-not *fx-building?*
     (if-let [^State? state (mget? me :fx$state)]
       (do (dp :FXDWO-settingimmediatestate (minfo me) (.-mounted state) (cinfo cell))
-          (trigger-state state me)
-          ;;; HACK
-          (if-let [^w/Element elt (fx-ctx me)]
-            (do (dp :FXDWO-direct-MNB (minfo me))
-                (mark-rebuild elt me cell))
-            (dp :FXDWO-NOT-MNBING-contextless (minfo me))))
-      (do
-        (dp :TGBuild-no-direct-fxstate (cinfo cell))
-        (if-let [^w/Element elt (fx-ctx me)]
-          (do (dp :FXDWO-direct-MNB (minfo me))
-              (mark-rebuild elt me cell))
-          (dp :FXDWO-NOT-MNBING-contextless (minfo me)))
-        (trigger-state-above (mpar))))))
+          (trigger-state state me))
+      (if-let [state-setter (:fx$state-setter (meta me))]
+        (do
+          (dp :FXDWO-settingimmediate-state-setter (minfo me)  (cinfo cell))
+          (state-setter (fn [] (do))))
+        (do
+          (dp :TGBuild-no-direct-fxstate (cinfo cell))
+          (trigger-state-above (mpar)))))))
 
 (defn trigger-state-above [me]
   (when me
     (dpx :TGState-trying-above (minfo me))
     (if-let [^State? state (mget? me :fx$state)]
-      (do (dp :TGState-above-bingo  (minfo me) (.-mounted state))
+      (do (dp :TGState-above-bingo (minfo me) (.-mounted state))
           (trigger-state state me))
       (trigger-state-above (mpar)))))
 
@@ -345,6 +346,67 @@
                      (~fx-class
                        ~@(fx-props>mx fx-props))))))))
 
+(defmacro konly-param1-stateful-builder [fx-class fx-props mx-props only-kid]
+  (let []
+    `(tilton.fmx.factory/make-fx-dart-widget
+       ~fx-props
+       (assoc ~mx-props
+         :_param-1 (tilton.mx.cell.core/cF ~only-kid)
+         :fx-class (quote ~fx-class)
+         :fx-gen (fn fgen [~'me ~'ctx]
+                   (dp :STATEFUL-builder!!!!!!!! (quote ~fx-class))
+                   (w/StatefulBuilder
+                     ;;  .key (tilton.fmx.api/fx-resolve-mget? ~'me :key ~'ctx))
+                     .builder (fn [~'ctx setStateCallback#]
+                                (tilton.fmx.factory/record-fx$state-setter ~'me setStateCallback#)
+                                (tilton.fmx.factory/with-flutter-ref
+                                  (~fx-class (tilton.fmx.api/fx-render ~'ctx
+                                               (tilton.mx.api/mget ~'me :_param-1))
+                                    ~@(fx-props>mx fx-props))))))))))
+
+(defn md-reactive? [me]
+  false)
+(defmacro konly-param1 [fx-class fx-props mx-props only-kid]
+  (let []
+    `(tilton.fmx.factory/make-fx-dart-widget
+       ~fx-props
+       (assoc ~mx-props
+         :_param-1 (tilton.mx.cell.core/cF ~only-kid)
+         :fx-class (quote ~fx-class)
+         :fx-gen (fn fgen [~'me ~'ctx]
+                   (let [make-widget (fn []
+                                       (tilton.fmx.factory/with-flutter-ref
+                                         (~fx-class (tilton.fmx.api/fx-render ~'ctx
+                                                      (tilton.mx.api/mget ~'me :_param-1))
+                                           ~@(fx-props>mx fx-props)))) ]
+
+
+                     ; now explore with hard-coded mx-dynamic? true and false
+
+                     (cond
+                       (md-reactive? ~'me) (do (dp :STATEFUL-builder!!!!!!!! (quote ~fx-class) (minfo ~'me))
+                                              (w/StatefulBuilder
+                                                ;;  .key (tilton.fmx.api/fx-resolve-mget? ~'me :key ~'ctx))
+                                                .builder (fn [~'ctx setStateCallback#]
+                                                           (tilton.fmx.factory/record-fx$state-setter ~'me setStateCallback#)
+                                                           (make-widget))))
+                     :else (do
+                             (dp :SLESS-builder!!! (quote ~fx-class) (minfo ~'me))
+                             (make-widget)))))))))
+
+(defmacro konly-param1-stateless [fx-class fx-props mx-props only-kid]
+  (let []
+    `(tilton.fmx.factory/make-fx-dart-widget
+       ~fx-props
+       (assoc ~mx-props
+         :_param-1 (tilton.mx.cell.core/cF ~only-kid)
+         :fx-class (quote ~fx-class)
+         :fx-gen (fn ~(fx-class-sym fx-class) [~'me ~'ctx]
+                   (tilton.fmx.factory/with-flutter-ref
+                     (~fx-class (tilton.fmx.api/fx-render ~'ctx
+                                  (tilton.mx.api/mget ~'me :_param-1))
+                       ~@(fx-props>mx fx-props))))))))
+#_
 (defmacro konly-param1-stateful [fx-class fx-props mx-props only-kid]
   (let []
     `(tilton.fmx.factory/make-fx-dart-widget
@@ -365,18 +427,7 @@
                                           (tilton.mx.api/mget ~'me :_param-1))
                                ~@(fx-props>mx fx-props))))))))))))
 
-(defmacro konly-param1-stateless [fx-class fx-props mx-props only-kid]
-  (let []
-    `(tilton.fmx.factory/make-fx-dart-widget
-       ~fx-props
-       (assoc ~mx-props
-         :_param-1 (tilton.mx.cell.core/cF ~only-kid)
-         :fx-class (quote ~fx-class)
-         :fx-gen (fn ~(fx-class-sym fx-class) [~'me ~'ctx]
-                   (tilton.fmx.factory/with-flutter-ref
-                     (~fx-class (tilton.fmx.api/fx-render ~'ctx
-                                  (tilton.mx.api/mget ~'me :_param-1))
-                       ~@(fx-props>mx fx-props))))))))
+
 
 (defmacro konly-for-builder-stateless [fx-class fx-props mx-props only-kid]
   (let []

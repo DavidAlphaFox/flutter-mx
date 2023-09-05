@@ -24,23 +24,23 @@
     (do (dp :----------------building-scaffold)
         (scaffold
           {:appBar
-           (app-bar {:backgroundColor (fx/in-my-context [me ctx]
-                                        (.-inversePrimary (.-colorScheme (m/Theme.of ctx))))
-                     :title           (m/Text "Flutter/MX Counter Classic")})
-           :floatingActionButton (floating-action-button
-                                   {:onPressed (as-dart-callback []
-                                                 (mswap! (fm* :scaffo) :counter inc))
-                                    :tooltip   "Increment"}
-                                   (m/Icon m/Icons.add))}
-          {:name    :scaffo
-           :counter (cI 0)}
+           (app-bar {:title           (m/Text "Flutter/MX Counter Classic")
+                     :backgroundColor (fx/in-my-context [me ctx]
+                                        (.-inversePrimary (.-colorScheme (m/Theme.of ctx))))})
+           :floatingActionButton
+           (floating-action-button
+             {:onPressed (as-dart-callback []
+                           (mswap! (fm* :the-counter) :counter inc))
+              :tooltip   "Increment"}
+             (m/Icon m/Icons.add))}
           (do (dp :----------------building-scaffo-kids)
               (center
                 (column {:mainAxisAlignment m/MainAxisAlignment.center}
-                  ;; HHACK (text "We have pushed the button this many times:")
-                  (text
+                  (text "We have pushed the button WOW this many times:")
+                  (fx/text?!
                     {:style (in-my-context [me ctx]
                               (.-headlineMedium (.-textTheme (m/Theme.of ctx))))}
-                    {:name :counter-text}
+                    {:name    :the-counter
+                     :counter (cI 0)}
                     (do (dp :---------------building-ctr-text)
-                        (str (mget (fasc :scaffo) :counter)))))))))))
+                        (str (mget me :counter)))))))))))
