@@ -83,6 +83,7 @@
 (defn record-fx$state [me state]
   (dp :recording-state (minfo me) (fn? state) #_#_cty/*defer-changes* cty/*within-integrity*)
   (mx/with-cc :reco-state
+    ;; todo does this need to be a cell?
     (mx/mset! me :fx$state state)))
 
 (defn record-fx$state-setter [me state-setter]
@@ -147,11 +148,12 @@
           (trigger-state state me))
       (if-let [state-setter (:fx$state-setter (meta me))]
         (do
-          (dp :FXDWO-settingimmediate-state-setter (minfo me)  (cinfo cell))
+          (dp :TRG-using-state-setter!!!!!!!!! (minfo me)  (cinfo cell))
           (state-setter (fn [] (do))))
         (do
-          (dp :TGBuild-no-direct-fxstate (cinfo cell))
-          (trigger-state-above (mpar)))))))
+          ;; todo expand on this message
+          (dp :TRG-WARNING!!!!!!-cannot-set-state!!! :cell (cinfo cell) :of (minfo me))
+          #_ (trigger-state-above (mpar)))))))
 
 (defn trigger-state-above [me]
   (when me
@@ -364,8 +366,7 @@
                                                (tilton.mx.api/mget ~'me :_param-1))
                                     ~@(fx-props>mx fx-props))))))))))
 
-(defn md-reactive? [me]
-  false)
+
 (defmacro konly-param1 [fx-class fx-props mx-props only-kid]
   (let []
     `(tilton.fmx.factory/make-fx-dart-widget
@@ -384,7 +385,7 @@
                      ; now explore with hard-coded mx-dynamic? true and false
 
                      (cond
-                       (md-reactive? ~'me) (do (dp :STATEFUL-builder!!!!!!!! (quote ~fx-class) (minfo ~'me))
+                       (tilton.mx.model.core/md-reactive? ~'me) (do (dp :STATEFUL-builder!!!!!!!! (quote ~fx-class) (minfo ~'me))
                                               (w/StatefulBuilder
                                                 ;;  .key (tilton.fmx.api/fx-resolve-mget? ~'me :key ~'ctx))
                                                 .builder (fn [~'ctx setStateCallback#]
@@ -406,7 +407,7 @@
                      (~fx-class (tilton.fmx.api/fx-render ~'ctx
                                   (tilton.mx.api/mget ~'me :_param-1))
                        ~@(fx-props>mx fx-props))))))))
-#_
+
 (defmacro konly-param1-stateful [fx-class fx-props mx-props only-kid]
   (let []
     `(tilton.fmx.factory/make-fx-dart-widget

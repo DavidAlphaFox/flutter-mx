@@ -21,26 +21,24 @@
               .colorScheme (m/ColorScheme.fromSeed
                              .seedColor m/Colors.deepPurple)
               .useMaterial3 true)}
-    (do (dp :----------------building-scaffold)
-        (scaffold
-          {:appBar
-           (app-bar {:title           (m/Text "Flutter/MX Counter Classic")
-                     :backgroundColor (fx/in-my-context [me ctx]
-                                        (.-inversePrimary (.-colorScheme (m/Theme.of ctx))))})
-           :floatingActionButton
-           (floating-action-button
-             {:onPressed (as-dart-callback []
-                           (mswap! (fm* :the-counter) :counter inc))
-              :tooltip   "Increment"}
-             (m/Icon m/Icons.add))}
-          (do (dp :----------------building-scaffo-kids)
-              (center
-                (column {:mainAxisAlignment m/MainAxisAlignment.center}
-                  (text "We have pushed the button WOW this many times:")
-                  (fx/text?!
-                    {:style (in-my-context [me ctx]
-                              (.-headlineMedium (.-textTheme (m/Theme.of ctx))))}
-                    {:name    :the-counter
-                     :counter (cI 0)}
-                    (do (dp :---------------building-ctr-text)
-                        (str (mget me :counter)))))))))))
+    (scaffold
+      {:appBar
+       (app-bar {:title           (m/Text "Flutter/MX Counter Classic")
+                 :backgroundColor (fx/in-my-context [me ctx]
+                                    (.-inversePrimary (.-colorScheme (m/Theme.of ctx))))})
+       :floatingActionButton
+       (floating-action-button
+         {:onPressed (as-dart-callback []
+                       (mswap! (fm* :the-counter) :counter inc))
+          :tooltip   "Increment"}
+         (m/Icon m/Icons.add))}
+      (center
+        (column {:mainAxisAlignment m/MainAxisAlignment.center}
+          (text "We have pushed the button this many times:")
+          (fx/text
+            {:style (in-my-context [me ctx]
+                      (.-headlineMedium (.-textTheme (m/Theme.of ctx))))}
+            {:name    :the-counter
+             :counter (cI 0)}
+            (do (dp :---------------building-ctr-text)
+                (str (mget me :counter)))))))))

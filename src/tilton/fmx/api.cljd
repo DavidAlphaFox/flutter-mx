@@ -224,10 +224,12 @@
 
 ;; todo does snackbar still need this custom macro?
 (deftag tilton.fmx.factory/make-fx-snackbar snack-bar m/SnackBar)
-(deftag tilton.fmx.factory/konly-param1 text?! m/Text)
-(deftag tilton.fmx.factory/konly-param1-stateful-builder text!! m/Text)
-(deftag tilton.fmx.factory/konly-param1-stateful text! m/Text)
-(deftag tilton.fmx.factory/konly-param1-stateless text m/Text)
+
+(deftag tilton.fmx.factory/konly-param1 text m/Text)
+;(deftag tilton.fmx.factory/konly-param1-stateful-builder text!! m/Text)
+;(deftag tilton.fmx.factory/konly-param1-stateful text! m/Text)
+;(deftag tilton.fmx.factory/konly-param1-stateless text m/Text)
+
 (deftag tilton.fmx.factory/prop-param1-childless-stateless icon m/Icon :icon)
 
 (deftag tilton.fmx.factory/k1-body-stateful scaffold m/Scaffold)

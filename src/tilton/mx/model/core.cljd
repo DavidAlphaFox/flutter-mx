@@ -1,6 +1,7 @@
 (ns tilton.mx.model.core
   (:require
     [clojure.string :as str]
+    [tilton.mx.model.base :refer [md-cz]]
     [tilton.mx.base
      :refer [trx wtrx dprn dp dpx prog1 dprn dp dpx *trx?* *trdeep* def-rmap-props mx-throw]]
     [tilton.mx.foundation :refer [mx-type PObserver observe]]
@@ -161,6 +162,17 @@
                         (md-awaken me)
                         #_(dp :md-awaken-complete))
         me))))
+
+(defn md-reactive? "Are any properties bound to input or formulaic values?"
+  ;; todo should this be memoized?
+  [me]
+  (some (fn [[ky c]]
+          (when (and c (not (some #{ky} [:fx$state])))
+            ;; todo ^^^ should we handle :fx$state as a cell?!!
+            ;; (dp :MDR?-sees ky (cinfo c) :me (minfo me))
+            (or (c-input? c)
+              (c-formula? c))))
+    (md-cz me)))
 
 ;;; --- family ------------------------------------
 
