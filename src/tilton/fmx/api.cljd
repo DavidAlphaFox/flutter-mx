@@ -216,12 +216,14 @@
   (future-builder m/FutureBuilder)
   (text-field m/TextField)
   (check-box m/Checkbox)
-  (elevated-button+icon m/ElevatedButton.icon))
+  (elevated-button+icon m/ElevatedButton.icon)
+  (icon-button m/IconButton))
 
 (deftag tilton.fmx.factory/konly-param1 text m/Text)
 
 (deftag tilton.fmx.factory/konly-prop material-app m/MaterialApp :home)
 (deftag tilton.fmx.factory/konly-prop scaffold m/Scaffold :body)
+(deftag tilton.fmx.factory/konly-prop alert-dialog m/AlertDialog :content)
 
 (deftags-plus tilton.fmx.factory/konly-prop [:child]
   (animated-container m/AnimatedContainer)
@@ -265,22 +267,13 @@
 ;; todo does snackbar still need this custom macro?
 (deftag tilton.fmx.factory/make-fx-snackbar snack-bar m/SnackBar)
 
-(defmacro alert-dialog [fx-props mx-props & children]
-  `(tilton.fmx.factory/k1-content-stateless m/AlertDialog ~fx-props ~mx-props ~@children))
 
-
-
-
-(defmacro icon-button [& vargs]
-  (let [[fx-props mx-props] vargs]
-    `(tilton.fmx.factory/childless-stateless m/IconButton ~fx-props ~mx-props)))
 
 (deftag tilton.fmx.factory/kids-for-builder list-view+separated m/ListView.separated)
 (deftag tilton.fmx.factory/kids-for-builder list-view+builder m/ListView.builder)
 
 
 (deftag tilton.fmx.factory/konly-for-builder-stateless layout-kid-builder w/LayoutBuilder)
-
 
 ;;; ---------------------------------------------------
 ;;; the dance between Flutter and MX is a bit intricate

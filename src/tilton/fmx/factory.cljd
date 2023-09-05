@@ -238,7 +238,7 @@
                                (make-widget)))))))))
 
 (defmacro konly-prop [target-prop-name fx-class fx-props mx-props & [only-kid]]
-  ;; only-kid optional for, eg, AnimatedContainer
+  ;; only-kid optional for, eg, AnimatedContainer, AlertDialog
   (let []
     `(tilton.fmx.factory/make-fx-dart-widget
        ~fx-props
