@@ -1,7 +1,7 @@
 (ns tilton.counter-app
   (:require
     ["package:flutter/material.dart" :as m]
-    [tilton.mx.api :refer [dp cI mget mswap! fm* fasc] :as mx]
+    [tilton.mx.api :refer [dp cI cF mget mswap! fm* fasc] :as mx]
     [tilton.fmx.api :as fx
      :refer [as-dart-callback in-my-context
              material-app scaffold app-bar floating-action-button
@@ -15,30 +15,41 @@
 ;;; to a different setState.
 
 (defn make-app []
-  (material-app
+  (fx/material-app
     {:title "Flutter/MX Counter Demo"
      :theme (m/ThemeData
               .colorScheme (m/ColorScheme.fromSeed
                              .seedColor m/Colors.deepPurple)
               .useMaterial3 true)}
     (scaffold
-      {:appBar
-       (app-bar {:title           (m/Text "Flutter/MX Counter Classic")
-                 :backgroundColor (fx/in-my-context [me ctx]
-                                    (.-inversePrimary (.-colorScheme (m/Theme.of ctx))))})
-       :floatingActionButton
-       (floating-action-button
-         {:onPressed (as-dart-callback []
-                       (mswap! (fm* :the-counter) :counter inc))
-          :tooltip   "Increment"}
-         (m/Icon m/Icons.add))}
+      {:appBar               (app-bar {:title (m/Text "Flutter/MX Counter Classico")
+                                       :backgroundColor #_m/Colors.purple
+                                       ;; todo get this working (s/b light purple:
+                                       (cF (fx/in-my-context [me ctx]
+                                             (.-inversePrimary (.-colorScheme (m/Theme.of ctx)))))})
+       :floatingActionButton (floating-action-button
+                               {:onPressed (as-dart-callback []
+                                             (mswap! (fm* :the-counter) :counter inc))
+                                :tooltip   "Increment"}
+                               (m/Icon m/Icons.add))}
       (center
         (column {:mainAxisAlignment m/MainAxisAlignment.center}
           (text "We have pushed the button this many times:")
-          (fx/text
-            {:style (in-my-context [me ctx]
-                      (.-headlineMedium (.-textTheme (m/Theme.of ctx))))}
+          (text {:style (in-my-context [me ctx]
+                          (.-headlineMedium (.-textTheme (m/Theme.of ctx))))}
             {:name    :the-counter
              :counter (cI 0)}
-            (do (dp :---------------building-ctr-text)
-                (str (mget me :counter)))))))))
+            (str (mget me :counter))))))))
+
+;;; If the AppBar needs a reactive "cF", we get an error on StatefulBuilder not being
+;;; of type PreferredSize. Then do this:
+; :appBar (fx/preferred-size
+;         {:preferredSize (.fromHeight m/Size 80.0)}
+;         (app-bar {:title (m/Text "Flutter/MX Counter Classico")
+;                   :backgroundColor m/Colors.purple
+;                   ;; todo get this working:
+;                   #_ (cF (fx/in-my-context [me ctx]
+;                         (dp :abar-bkg (mx/minfo me) :THEME (m/Theme.of ctx))
+;                         (dp :abar-bkg-colorscheme (do (.-colorScheme (m/Theme.of ctx))))
+;                         (.-inversePrimary (.-colorScheme (m/Theme.of ctx)))))}
+;           {:testx (cI 42)}))

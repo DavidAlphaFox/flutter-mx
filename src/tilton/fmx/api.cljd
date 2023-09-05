@@ -184,14 +184,14 @@
   (container m/Container)
   (card m/Card)
   (padding m/Padding)
-  (center m/Center)
+  ;; (center m/Center)
   (place-holder w/PlaceHolder)
   (single-child-scroll-view m/SingleChildScrollView)
   (expanded m/Expanded)
   (preferred-size m/PreferredSize)
   (animated-opacity m/AnimatedOpacity)
   (drawer-header m/DrawerHeader)
-  (floating-action-button m/FloatingActionButton)
+  ;; (floating-action-button m/FloatingActionButton)
   (align m/Align)
   (visibility m/Visibility)
   (drawer m/Drawer)
@@ -200,8 +200,10 @@
   (ink m/Ink)
   (gesture-detector m/GestureDetector))
 
+(deftag tilton.fmx.factory/kidless-childless app-bar m/AppBar)
+
 (deftags tilton.fmx.factory/childless-stateless
-  (app-bar m/AppBar)
+  ;;(app-bar m/AppBar)
   (data-table m/DataTable)
   (text-style p/TextStyle)
   (rounded-rectangle-border p/RoundedRectangleBorder)
@@ -226,13 +228,13 @@
 (deftag tilton.fmx.factory/make-fx-snackbar snack-bar m/SnackBar)
 
 (deftag tilton.fmx.factory/konly-param1 text m/Text)
-;(deftag tilton.fmx.factory/konly-param1-stateful-builder text!! m/Text)
-;(deftag tilton.fmx.factory/konly-param1-stateful text! m/Text)
-;(deftag tilton.fmx.factory/konly-param1-stateless text m/Text)
 
 (deftag tilton.fmx.factory/prop-param1-childless-stateless icon m/Icon :icon)
 
-(deftag tilton.fmx.factory/k1-body-stateful scaffold m/Scaffold)
+(deftag tilton.fmx.factory/konly-prop material-app m/MaterialApp :home)
+(deftag tilton.fmx.factory/konly-prop scaffold m/Scaffold :body)
+(deftag tilton.fmx.factory/konly-prop center m/Center :child)
+(deftag tilton.fmx.factory/konly-prop floating-action-button m/FloatingActionButton :child)
 
 (defmacro icon-button [& vargs]
   (let [[fx-props mx-props] vargs]
@@ -240,7 +242,8 @@
 
 (deftag tilton.fmx.factory/kids-for-builder list-view+separated m/ListView.separated)
 (deftag tilton.fmx.factory/kids-for-builder list-view+builder m/ListView.builder)
-(deftag tilton.fmx.factory/k1-home-stateful material-app m/MaterialApp)
+
+
 (deftag tilton.fmx.factory/konly-for-builder-stateless layout-kid-builder w/LayoutBuilder)
 
 (deftags tilton.fmx.factory/k1-child-stateful
@@ -265,9 +268,11 @@
 (deftag tilton.fmx.factory/kids->prop-stateful
   navigation-rail m/NavigationRail :destinations)
 
+(deftag tilton.fmx.factory/kids-prop column m/Column :children)
+
 (deftags tilton.fmx.factory/children-stateless
   (stack m/Stack)
-  (column m/Column)
+  ; (column m/Column)
   (row m/Row)
   (list-view m/ListView))
 
