@@ -14,10 +14,13 @@
     (material-app
       {:title title}
       (scaffold
-        {:appBar (app-bar {:title (text title)})}
+        {:appBar (m/AppBar .title (m/Text "hi mom")) #_ (app-bar {:title (text title)})}
         (center
           (elevated-button
             {:onPressed (as-dart-callback []
+                          (dp :ctx ctx)
+
+                          (dp :oksofar)
                           (.showSnackBar (m/ScaffoldMessenger.of ctx)
                             (fx-render ctx
                               (snack-bar {:action  (m/SnackBarAction
