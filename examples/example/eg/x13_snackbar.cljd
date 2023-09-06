@@ -15,27 +15,25 @@
     (material-app
       {:title title}
       (scaffold
-        {:appBar (m/AppBar .title (m/Text "hi mom")) #_ (app-bar {:title (text title)})}
-        (center {}{:dddd (cI 16)}
+        {:appBar (m/AppBar .title (m/Text "hi mom")) #_(app-bar {:title (text title)})}
+        (center
           (elevated-button
             {:onPressed (as-dart-callback []
-                          (dp :me (minfo me) :ctx? (dart/is? ctx m/BuildContext) :ctx ctx)
-                          (dp :me (minfo me) :fx$ctx (:fx$ctx (meta me)))
-                          (dp :par (minfo (mx/mpar me)) :ctx ctx)
-
-                          (dp :oksofar)
                           (let [depth (atom 0)]
                             (.visitAncestorElements ^m/BuildContext ctx
                               (fn [elt]
-                                (dp :visA! @depth (dart/is? elt m/BuildContext) elt)
-                                (swap! depth inc)
-                                (< @depth 20))))
-                          #_
+                                (cond
+                                  elt (do
+                                        (dp :visA! @depth (.-hashCode elt) (dart/is? elt m/BuildContext) elt)
+                                        (swap! depth inc)
+                                        (< @depth 32))
+                                  :else false))))
                           (.showSnackBar (m/ScaffoldMessenger.of ctx)
-                            (fx-render ctx
-                              (snack-bar {:action  (m/SnackBarAction
-                                                     .label "Undo!"
-                                                     .onPressed (fn [] (dart:core/print :UNDO!!!!!)))
-                                          :content (text "Yay! A SnackBar!")}))))}
+                              (fx-render ctx
+                                (snack-bar {:action  (m/SnackBarAction
+                                                       .label "Undo!"
+                                                       .onPressed (fn [] (dart:core/print :UNDO!!!!!)))
+                                            :content (text "Yay! A SnackBar!")}))))}
             {:dummy (cI 42)}
             (text "Show text")))))))
+

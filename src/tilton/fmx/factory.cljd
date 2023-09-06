@@ -35,7 +35,7 @@
 
 (defn call-with-flutter-ref [me ctx factory]
   (let [ref (factory)]
-    (dp :flutter-ref-built!!! (minfo me) (dart/is? ref m/Widget) ref)
+    ;;(dp :flutter-ref-built!!! (.-hashCode ctx) (minfo me)  (dart/is? ref m/Widget) ref)
     (tilton.fmx.factory/ctx-check me ctx)
     (rmap-meta-set! [:fx$flutter-ref me] ref)
     ref))
@@ -244,9 +244,11 @@
        ~fx-props
        (assoc ~mx-props
          :fx-class (quote ~fx-class)
-         :fx-gen (fn fgen [~'me ~'ctx]
-                   (let [make-widget (fn []
+         :fx-gen (fn fgen [~'me ctxtop#]
+                   (dp :konly-prop-fx-gen-sees (.-hashCode ctxtop#) ctxtop# (tilton.mx.api/minfo ~'me))
+                   (let [make-widget (fn [~'ctx]
                                        (tilton.fmx.factory/with-flutter-ref
+                                         (dp :make-widget-sees (.-hashCode ~'ctx) (tilton.mx.api/minfo ~'me))
                                          (~fx-class
                                            ; the prop...
                                            ~(symbol (str "." (name target-prop-name)))
@@ -258,12 +260,13 @@
                        (tilton.mx.model.core/md-reactive? ~'me)
                        (do (dp :STATEFUL-konly-prop!!!!!! (quote ~fx-class) (minfo ~'me))
                            (w/StatefulBuilder
-                             .builder (fn [~'ctx setStateCallback#]
+                             .builder (fn [builderctx# setStateCallback#]
+                                        (dp :stateful-builder-sees (.-hashCode builderctx#) (tilton.mx.api/minfo ~'me))
                                         (tilton.fmx.factory/record-fx$state-setter ~'me setStateCallback#)
-                                        (make-widget))))
+                                        (make-widget builderctx#))))
                        :else (do
-                               (dp :STATELESS-konly-prop!!! (quote ~fx-class) (minfo ~'me))
-                               (make-widget))))))
+                               (dp :STATELESS-konly-prop!!! (quote ~fx-class) :ctx (.-hashCode ctxtop#) (minfo ~'me))
+                               (make-widget ctxtop#))))))
        (tilton.mx.api/cFkids ~only-kid))))
 
 (defmacro kids-prop [target-prop-name fx-class fx-props mx-props & kids]
