@@ -369,7 +369,7 @@
                                      :me? true
                                      :skip where
                                      :inside? true))
-                         (do (dpx :no-up-from (minfo where))
+                         (do (dp :no-par-no-host-up-from (minfo where))
                              false))))
 
                 (when (:must? options)
