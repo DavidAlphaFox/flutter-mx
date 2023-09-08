@@ -285,7 +285,7 @@
        (assoc ~mx-props
          :fx-class (quote ~fx-class)
          :fx-gen (fn ~(fx-class-sym fx-class) [~'me ~'ctx]
-                   (do ;; tilton.fmx.factory/with-widget [~'me ctx#]
+                   (tilton.fmx.factory/with-widget [~'me ~'ctx]
                      (m/Builder
                        .builder (fn [ctx2#]
                                   ;; the layout builder wants back a native Flutter widget, so we have to do the conversion
