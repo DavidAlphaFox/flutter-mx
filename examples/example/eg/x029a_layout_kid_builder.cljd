@@ -28,7 +28,8 @@
           (fx/layout-kid-builder
             ;; for now, we must use the hard-coded :box-constraints to get that build parameter.
             ;; We could make this parameterizable, but builders are passed boxConstraints -- why
-            ;; make that tailorable?
+            ;; make that tailorable? Ah, because the builder mechanism is a general one. Well, layout-builder
+            ;; takes Constraints....
             (fx/center
               (fx/padding {:padding (m/EdgeInsets.all 20)}
                 (fx/column {:mainAxisAlignment m/MainAxisAlignment.spaceEvenly}

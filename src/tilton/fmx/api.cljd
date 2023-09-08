@@ -275,6 +275,8 @@
 
 (deftag tilton.fmx.factory/konly-for-builder-stateless layout-kid-builder w/LayoutBuilder)
 
+(deftag tilton.fmx.factory/konly-builder builder-ctx w/Builder)
+
 ;;; ---------------------------------------------------
 ;;; the dance between Flutter and MX is a bit intricate
 ;;; these macros try to hide the plumbing without being obscure.

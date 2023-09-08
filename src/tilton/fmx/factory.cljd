@@ -31,17 +31,20 @@
   (dp :debug-fn!!! fn)
   (reset! *fmx-debugger* fn))
 
-;;; --- Flutter refs of fx models -----------------------------
+;;; --- DEPRECATED ?? Flutter refs of fx models -----------------------------
 
 (defn call-with-flutter-ref [me ctx factory]
   (let [ref (factory)]
-    ;;(dp :flutter-ref-built!!! (.-hashCode ctx) (minfo me)  (dart/is? ref m/Widget) ref)
+    (dp :flutter-ref-built!!!!!!! (.-hashCode ctx) (minfo me)  (dart/is? ref m/Widget) ref)
     (tilton.fmx.factory/ctx-check me ctx)
     (rmap-meta-set! [:fx$flutter-ref me] ref)
     ref))
 
 (defmacro with-flutter-ref [& body]
   `(call-with-flutter-ref ~'me ~'ctx (fn [] ~@body)))
+
+(defmacro with-widget [[me ctx] & body]
+  `(call-with-flutter-ref ~me ~ctx (fn [] ~@body)))
 
 (defn flutter-ref [me]
   (:fx$flutter-ref (meta me)))
@@ -266,7 +269,31 @@
                                         (make-widget builderctx#))))
                        :else (do
                                (dp :STATELESS-konly-prop!!! (quote ~fx-class) :ctx (.-hashCode ctxtop#) (minfo ~'me))
-                               (make-widget ctxtop#))))))
+                               (if true
+                                 (make-widget ctxtop#)
+                                 (w/Builder
+                                   .builder (fn [builderctx#]
+                                              (dp :stateless-builder-sees (.-hashCode builderctx#) (tilton.mx.api/minfo ~'me))
+                                              (make-widget builderctx#)))))))))
+       (tilton.mx.api/cFkids ~only-kid))))
+
+(defmacro konly-builder [fx-class fx-props mx-props only-kid]
+  (let []
+    `(tilton.fmx.factory/make-fx
+       (new tilton.fmx.factory/FXDartWidget)
+       ~fx-props
+       (assoc ~mx-props
+         :fx-class (quote ~fx-class)
+         :fx-gen (fn ~(fx-class-sym fx-class) [~'me ~'ctx]
+                   (do ;; tilton.fmx.factory/with-widget [~'me ctx#]
+                     (m/Builder
+                       .builder (fn [ctx2#]
+                                  ;; the layout builder wants back a native Flutter widget, so we have to do the conversion
+                                  (fx/fx-render ctx2# (first (tilton.mx.api/mkids ~'me))))
+                       ~@(let [kvs (for [k# (keys fx-props)]
+                                     [(symbol (str "." (name k#)))
+                                      `(tilton.fmx.api/fx-resolve-mget? ~'me ~k# ~'ctx)])]
+                           (apply concat kvs))))))
        (tilton.mx.api/cFkids ~only-kid))))
 
 (defmacro kids-prop [target-prop-name fx-class fx-props mx-props & kids]
@@ -494,8 +521,6 @@
                        ~@(fx-props>mx fx-props)))))
        (tilton.mx.model.core/cFkids ~child))))
 
-
-
 (defmacro konly-for-builder-stateless [fx-class fx-props mx-props only-kid]
   (let []
     `(tilton.fmx.factory/make-fx
@@ -544,6 +569,11 @@
 ;;; --- kids for builder ------------------------------------------------------
 
 (defmacro kids-for-builder [fx-class fx-props mx-props & children]
+  ;; hunh? There is no sign of a builder here! Correct, this might
+  ;; have other uses, but for now it just handles the "builder" edge case where
+  ;; subordinate "items", not "children", arise from nominal kids, via a callback.
+  ;; So lexical kids just end up as f/mx proxy kids. Then we must supply an itemBuilder callback
+  ;; that generates Fx items from fmx kids. See list-view+builder usages with kids,
   (let []
     `(tilton.fmx.factory/make-fx-dart-widget
        ~fx-props

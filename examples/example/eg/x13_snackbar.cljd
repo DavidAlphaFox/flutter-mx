@@ -4,7 +4,8 @@
     ["package:flutter/material.dart" :as m]
     [tilton.mx.base :refer [dprn dp dpx]]
     [tilton.mx.api :refer [cI cF cFn cF+ minfo] :as mx]
-    [tilton.fmx.api
+    [tilton.fmx.factory :as fxf]
+    [tilton.fmx.api :as fx
      :refer [snack-bar material-app scaffold center elevated-button text app-bar fx-render as-dart-callback]]))
 
 ;; Original: https://github.com/Tensegritics/ClojureDart/tree/main/samples/snackbar
@@ -15,25 +16,36 @@
     (material-app
       {:title title}
       (scaffold
-        {:appBar (m/AppBar .title (m/Text "hi mom")) #_(app-bar {:title (text title)})}
+        {:appBar (app-bar {:title (text title)})}
         (center
-          (elevated-button
-            {:onPressed (as-dart-callback []
-                          (let [depth (atom 0)]
-                            (.visitAncestorElements ^m/BuildContext ctx
-                              (fn [elt]
-                                (cond
-                                  elt (do
-                                        (dp :visA! @depth (.-hashCode elt) (dart/is? elt m/BuildContext) elt)
-                                        (swap! depth inc)
-                                        (< @depth 32))
-                                  :else false))))
-                          (.showSnackBar (m/ScaffoldMessenger.of ctx)
-                              (fx-render ctx
-                                (snack-bar {:action  (m/SnackBarAction
-                                                       .label "Undo!"
-                                                       .onPressed (fn [] (dart:core/print :UNDO!!!!!)))
-                                            :content (text "Yay! A SnackBar!")}))))}
-            {:dummy (cI 42)}
-            (text "Show text")))))))
+          (fx/builder-ctx ;; context ".of" visibility workaround
+            (elevated-button
+              {:onPressed (as-dart-callback []
+                            (.showSnackBar (m/ScaffoldMessenger.of ctx)
+                                (fx-render ctx
+                                  (snack-bar {:action  (m/SnackBarAction
+                                                         .label "Undo!"
+                                                         .onPressed (fn [] (dart:core/print :UNDO!!!!!)))
+                                              :content (text "Yay! A SnackBar!")}))))}
+              ;{:dummy (cI 42)}
+              (text "Show text"))))))))
+
+#_ (let [depth (atom 0)]
+     (dp :visA-TOP! @depth (.-hashCode ctx) ctx)
+     ; m/ScaffoldMessenger
+     ; .getElementForInheritedWidgetOfExactType
+     (dp :VIA-maybeOF-messenger (m/ScaffoldMessenger.maybeOf ctx))
+     ;(dp :VIA-OF-messenger (m/ScaffoldMessenger.of ctx))
+     (dp :stored-ctx!!!!!! (.-hashCode (fxf/fx-ctx me)))
+     #_(dp :VIA_GET!!!! (#/(.findAncestorWidgetOfExactType m/ScaffoldMessenger)
+                          (fxf/flutter-ref me) #_ctx))
+     #_(.visitAncestorElements ^m/BuildContext ctx
+         (fn [elt]
+           (cond
+             elt (do
+                   (dp :visA! @depth (.-hashCode elt) (dart/is? elt m/BuildContext) elt)
+                   (swap! depth inc)
+                   (< @depth 32))
+             :else false))))
+
 
