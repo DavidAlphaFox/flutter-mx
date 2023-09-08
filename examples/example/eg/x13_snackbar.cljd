@@ -33,22 +33,3 @@
             {:with-ctx true}                                ;; <============== option 2
             (text "Show text")))))))
 
-#_(let [depth (atom 0)]
-    (dp :visA-TOP! @depth (.-hashCode ctx) ctx)
-    ; m/ScaffoldMessenger
-    ; .getElementForInheritedWidgetOfExactType
-    (dp :VIA-maybeOF-messenger (m/ScaffoldMessenger.maybeOf ctx))
-    ;(dp :VIA-OF-messenger (m/ScaffoldMessenger.of ctx))
-    (dp :stored-ctx!!!!!! (.-hashCode (fxf/fx-ctx me)))
-    #_(dp :VIA_GET!!!! (#/(.findAncestorWidgetOfExactType m/ScaffoldMessenger)
-                         (fxf/flutter-ref me) #_ctx))
-    #_(.visitAncestorElements ^m/BuildContext ctx
-        (fn [elt]
-          (cond
-            elt (do
-                  (dp :visA! @depth (.-hashCode elt) (dart/is? elt m/BuildContext) elt)
-                  (swap! depth inc)
-                  (< @depth 32))
-            :else false))))
-
-

@@ -212,6 +212,7 @@
 
 (deftags tilton.fmx.factory/kidless-childless
   (slider m/Slider)
+  (snack-bar m/SnackBar)
   (dropdown-button m/DropdownButton)
   (future-builder m/FutureBuilder)
   (text-field m/TextField)
@@ -220,7 +221,6 @@
   (icon-button m/IconButton))
 
 (deftag tilton.fmx.factory/konly-param1 text m/Text)
-
 (deftag tilton.fmx.factory/konly-prop material-app m/MaterialApp :home)
 (deftag tilton.fmx.factory/konly-prop scaffold m/Scaffold :body)
 (deftag tilton.fmx.factory/konly-prop alert-dialog m/AlertDialog :content)
@@ -262,13 +262,8 @@
 
 (deftag tilton.fmx.factory/prop-param1-kidless icon m/Icon :icon)
 
-;(deftag tilton.fmx.factory/childless-stateful snack-bar m/SnackBar)
-
 ;;; --- UNCONVERTED -------------------------------------
 
-;; todo does snackbar still need this custom macro?
-;(deftag tilton.fmx.factory/childless-stateful-ex snack-bar m/SnackBar)
-(deftag tilton.fmx.factory/childless-stateless snack-bar m/SnackBar)
 
 (deftag tilton.fmx.factory/kids-for-builder list-view+separated m/ListView.separated)
 (deftag tilton.fmx.factory/kids-for-builder list-view+builder m/ListView.builder)
