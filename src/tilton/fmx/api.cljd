@@ -262,11 +262,16 @@
 
 (deftag tilton.fmx.factory/prop-param1-kidless icon m/Icon :icon)
 
+(deftag tilton.fmx.factory/kids-kids list-view+builder m/ListView.builder)
+(deftag tilton.fmx.factory/kids-kids list-view+separated m/ListView.separated) ;; untested
+
 ;;; --- UNCONVERTED -------------------------------------
 
 
-(deftag tilton.fmx.factory/kids-for-builder list-view+separated m/ListView.separated)
-(deftag tilton.fmx.factory/kids-for-builder list-view+builder m/ListView.builder)
+
+
+
+
 
 
 (deftag tilton.fmx.factory/konly-for-builder-stateless layout-kid-builder w/LayoutBuilder)

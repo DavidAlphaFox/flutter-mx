@@ -371,6 +371,22 @@
                                (dpx :STATELESS-builder!!! (quote ~fx-class) (minfo ~'me))
                                (make-widget)))))))))
 
+(defmacro kids-kids [fx-class fx-props mx-props & children]
+  ;; hunh? There is no sign of a builder here! Correct, this might
+  ;; have other uses, but for now it just handles the "builder" edge case where
+  ;; subordinate "items", not "children", arise from nominal kids, via a callback.
+  ;; So lexical kids just end up as f/mx proxy kids. Then we must supply an itemBuilder callback
+  ;; that generates Fx items from fmx kids. See list-view+builder usages with kids,
+  (let []
+    `(tilton.fmx.factory/make-fx-dart-widget
+       ~fx-props
+       (assoc ~mx-props
+         :fx-class (quote ~fx-class)
+         :fx-gen (fn fgen [~'me ~'ctx]
+                   (tilton.fmx.factory/with-flutter-ref
+                     (~fx-class ~@(fx-props>mx fx-props)))))
+       (tilton.mx.api/cFkids ~@children))))
+
 ;;; --- OLDSKOOL ---------------------------------------------
 
 (defmacro k1-child-stateful [fx-class fx-props mx-props & [child]]
@@ -440,25 +456,6 @@
                              (~fx-class
                                ~@(fx-props>mx fx-props))))))))))))
 
-
-
-;;; --- kids for builder ------------------------------------------------------
-
-(defmacro kids-for-builder [fx-class fx-props mx-props & children]
-  ;; hunh? There is no sign of a builder here! Correct, this might
-  ;; have other uses, but for now it just handles the "builder" edge case where
-  ;; subordinate "items", not "children", arise from nominal kids, via a callback.
-  ;; So lexical kids just end up as f/mx proxy kids. Then we must supply an itemBuilder callback
-  ;; that generates Fx items from fmx kids. See list-view+builder usages with kids,
-  (let []
-    `(tilton.fmx.factory/make-fx-dart-widget
-       ~fx-props
-       (assoc ~mx-props
-         :fx-class (quote ~fx-class)
-         :fx-gen (fn fgen [~'me ~'ctx]
-                   (tilton.fmx.factory/with-flutter-ref
-                     (~fx-class ~@(fx-props>mx fx-props)))))
-       (tilton.mx.api/cFkids ~@children))))
 
 ;;; -------------------------------------------------------------
 
