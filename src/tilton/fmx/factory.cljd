@@ -267,7 +267,7 @@
                                         (dpx :stateful-builder-sees (.-hashCode builderctx#) (tilton.mx.api/minfo ~'me))
                                         (tilton.fmx.factory/record-fx$state-setter ~'me setStateCallback#)
                                         (make-widget builderctx#))))
-                       (tilton.mx.api/mget? ~'me :with-ctx)
+                       (tilton.mx.api/mget? ~'me :with-builder-ctx)
                        (w/Builder
                          .builder (fn [builderctx#]
                                     (dpx :stateless-builder-sees (.-hashCode builderctx#) (tilton.mx.api/minfo ~'me))

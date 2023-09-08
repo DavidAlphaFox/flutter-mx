@@ -21,15 +21,12 @@
           ; with-ctx alternative: (fx/builder-ctx ... ;; <============ option 1
           (elevated-button
             {:onPressed (as-dart-callback []
-                          (let [bar (fx-render ctx
-                                      (snack-bar {:action  (m/SnackBarAction
-                                                             .label "Undo!"
-                                                             .onPressed (fn [] (dart:core/print :UNDO!!!!!)))
-                                                  :content (text "Yay! A SnackBar!")}))]
-                            (dp :render-bar!!!!! bar)
-                            (.showSnackBar (m/ScaffoldMessenger.of ctx)
-                              ^m/SnackBar ;; hhack
-                              bar)))}
-            {:with-ctx true}                                ;; <============== option 2
+                          (.showSnackBar (m/ScaffoldMessenger.of ctx)
+                            (fx-render ctx
+                              (snack-bar {:action  (m/SnackBarAction
+                                                     .label "Undo!"
+                                                     .onPressed (fn [] (dart:core/print :UNDO!!!!!)))
+                                          :content (text "Yay! A SnackBar!")}))))}
+            {:with-builder-ctx true}                                ;; <============== option 2
             (text "Show text")))))))
 
