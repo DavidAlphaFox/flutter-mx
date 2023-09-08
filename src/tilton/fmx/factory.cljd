@@ -284,15 +284,15 @@
        ~fx-props
        (assoc ~mx-props
          :fx-class (quote ~fx-class)
-         :fx-gen (fn ~(fx-class-sym fx-class) [~'me ~'ctx]
-                   (tilton.fmx.factory/with-widget [~'me ~'ctx]
+         :fx-gen (fn ~(fx-class-sym fx-class) [me# ctx3#]
+                   (tilton.fmx.factory/with-widget [me# ctx3#]
                      (m/Builder
                        .builder (fn [ctx2#]
                                   ;; the layout builder wants back a native Flutter widget, so we have to do the conversion
-                                  (fx/fx-render ctx2# (first (tilton.mx.api/mkids ~'me))))
+                                  (fx/fx-render ctx2# (first (tilton.mx.api/mkids me#))))
                        ~@(let [kvs (for [k# (keys fx-props)]
                                      [(symbol (str "." (name k#)))
-                                      `(tilton.fmx.api/fx-resolve-mget? ~'me ~k# ~'ctx)])]
+                                      `(tilton.fmx.api/fx-resolve-mget? me# ~k# ctx2#)])]
                            (apply concat kvs))))))
        (tilton.mx.api/cFkids ~only-kid))))
 
