@@ -34,7 +34,7 @@
     ;[example.eg.x040-named-routes :as x040]
     [example.eg.x029a-layout-kid-builder :as x029]
     [example.eg.flutter-layout-tutorial :as dlayout]
-    [example.eg.flutter-tts :as tts]))
+    #_ [example.eg.flutter-tts :as tts]))
 
 (defn select []
   (x13/make-app))

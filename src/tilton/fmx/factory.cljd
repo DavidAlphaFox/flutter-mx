@@ -447,6 +447,17 @@
        (tilton.mx.api/cFkids ~@children))))
 
 ;;; --- the maker macros ---------------------------------------------------
+(defmacro childless-stateful-ex [fx-class fx-props mx-props]
+  (let []
+    `(tilton.fmx.factory/make-fx-dart-widget
+       ~fx-props
+       (assoc ~mx-props
+         :fx-class (quote ~fx-class)
+         :fx-gen (fn ~(fx-class-sym fx-class) [~'me ~'ctx]
+                   (dp :genning-childless-stateful (minfo ~'me))
+                   ;;^#/(w/State m/SnackBar)
+                   (~fx-class
+                     ~@(fx-props>mx fx-props)))))))
 
 (defmacro make-fx-snackbar [fx-class fx-props mx-props & children]
   (let []
@@ -455,6 +466,7 @@
        (assoc ~mx-props
          :fx-class (quote ~fx-class)
          :fx-gen (fn [~'me ctx]
+                   (dp :genning-snack-bar!!!!!!!!!!!!!!!!! ~fx-class)
                    (reify :extends (~fx-class #_m/SnackBar
                                      ~@(let [kvs (for [[k# _#] fx-props]
                                                    [(symbol (str "." (name k#)))
@@ -463,7 +475,7 @@
                                          (apply concat kvs)))
                      ^#/(w/State ~fx-class #_m/SnackBar)
                      (~'createState [_#]
-                       (reify :extends #/(w/State #_~fx-class m/SnackBar)
+                       (reify :extends #/(w/State #_ ~fx-class m/SnackBar)
                          (^void ~'initState [this]
                            (tilton.fmx.factory/fx-state-init ~'me this))
                          (~'build [_# ~'ctx]
@@ -565,6 +577,8 @@
                            (tilton.fmx.factory/with-flutter-ref
                              (~fx-class
                                ~@(fx-props>mx fx-props))))))))))))
+
+
 
 ;;; --- kids for builder ------------------------------------------------------
 

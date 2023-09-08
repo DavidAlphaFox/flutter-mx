@@ -262,12 +262,12 @@
 
 (deftag tilton.fmx.factory/prop-param1-kidless icon m/Icon :icon)
 
+;(deftag tilton.fmx.factory/childless-stateful snack-bar m/SnackBar)
+
 ;;; --- UNCONVERTED -------------------------------------
 
 ;; todo does snackbar still need this custom macro?
-(deftag tilton.fmx.factory/make-fx-snackbar snack-bar m/SnackBar)
-
-
+(deftag tilton.fmx.factory/childless-stateful-ex snack-bar m/SnackBar)
 
 (deftag tilton.fmx.factory/kids-for-builder list-view+separated m/ListView.separated)
 (deftag tilton.fmx.factory/kids-for-builder list-view+builder m/ListView.builder)
