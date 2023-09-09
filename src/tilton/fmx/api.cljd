@@ -126,7 +126,7 @@
                        (dp :render-sees-not-mref?-passing-thru fx))
                    fx))
       :else (let [gen (mget fx :fx-gen)]
-              (dpx :render-sees-gen!! gen)
+              (dp :fx-render-sees-gen!! (minfo fx))
               (chk gen "OBAD: fx-render of model finds no fx-gen: ")
               ;;(dp :fx-render-records (minfo fx) ctx)
               ;; nope (fxf/record-fx$ctx fx ctx)
@@ -246,11 +246,8 @@
   (animated-builder m/AnimatedBuilder)
   )
 
-(deftags-plus tilton.fmx.factory/konly-prop-ex [:child]
+(deftags-plus tilton.fmx.factory/konly-prop [:child]
   (elevated-button m/ElevatedButton))
-
-#_ (deftags-plus tilton.fmx.factory/konly-prop-fab [:child]
-  (sized-box+expand m/SizedBox.expand))
 
 (defmacro sized-box+expand [fx-props mx-props & children]
           `(tilton.fmx.factory/k1-child-stateful m/SizedBox.expand ~fx-props ~mx-props ~@children))
