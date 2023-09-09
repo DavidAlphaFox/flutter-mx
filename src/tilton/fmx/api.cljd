@@ -238,7 +238,6 @@
   (safe-area w/SafeArea)
   (ticker-mode w/TickerMode)
   (dismissible w/Dismissible)
-  (elevated-button m/ElevatedButton)
   (default-tab-controller m/DefaultTabController)
   (focus m/Focus)
   (focus-scope m/FocusScope)
@@ -246,6 +245,9 @@
   (focus+focus-node m/Focus.withExternalFocusNode)
   (animated-builder m/AnimatedBuilder)
   )
+
+(deftags-plus tilton.fmx.factory/konly-prop-ex [:child]
+  (elevated-button m/ElevatedButton))
 
 #_ (deftags-plus tilton.fmx.factory/konly-prop-fab [:child]
   (sized-box+expand m/SizedBox.expand))
