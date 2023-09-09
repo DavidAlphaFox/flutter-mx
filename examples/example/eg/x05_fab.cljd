@@ -28,7 +28,7 @@
          :itemBuilder (fn [ctx i] (fake-item (odd? i)))}))))
 
 (defn expandable-fab [& {:keys [initial-open? distance actions] :or {initial-open? false}}]
-  (fmk/sized-box+expand-ful
+  (let [fab (fx/sized-box+expand
     {}                                                      ;; <= necessary placeholder
     {:name             :fab
      ; --- Dart lifecycle ---------------------------
@@ -38,11 +38,13 @@
                            (.dispose controller)))
      ; --- animation mechanics ----------------------
      :controller       (cF (fx/when-my-state [state]
+                             (dp :BAM-state!!!)
                              (m/AnimationController
                                .value (if initial-open? 1.0 0.0)
                                .duration (dart:core/Duration .milliseconds 250)
                                .vsync state)))
      :expand-animation (cF (when-let [c (fx/my-controller)]
+                             (dp :BAM-controller!!!)
                              (m/CurvedAnimation
                                .curve m/Curves.fastOutSlowIn
                                .reverseCurve m/Curves.easeOutQuad
@@ -57,8 +59,8 @@
                                           :reverse (.reverse c))))]
                          (if (mget me :open?)
                            :forward :reverse))}
-
     (when-let [anime (mget me :expand-animation)]
+      (dp :FAB_GUTS!!!!!!!!!!!!!!!!!)
       (fx/stack
         {:alignment    m/Alignment.bottomRight
          :clipBehavior m/Clip.none}
@@ -73,7 +75,9 @@
                      :progress-key :expand-animation
                      :action action))
                  actions))
-        (tap-to-open-fab me)))))
+        (tap-to-open-fab me))))]
+    (dp :genned-fab-fx!!!! (minfo fab))
+    fab))
 
 (defn expanding-action-button [me anime & {:keys [action direction-degrees max-distance progress-key]}]
   (fx/animated-builder

@@ -244,7 +244,14 @@
   (focus-scope m/FocusScope)
   (text-button m/TextButton)
   (focus+focus-node m/Focus.withExternalFocusNode)
-  (animated-builder m/AnimatedBuilder))
+  (animated-builder m/AnimatedBuilder)
+  )
+
+#_ (deftags-plus tilton.fmx.factory/konly-prop-fab [:child]
+  (sized-box+expand m/SizedBox.expand))
+
+(defmacro sized-box+expand [fx-props mx-props & children]
+          `(tilton.fmx.factory/k1-child-stateful m/SizedBox.expand ~fx-props ~mx-props ~@children))
 
 (deftags-plus tilton.fmx.factory/kids-prop [:children]
   (stack m/Stack)
@@ -267,14 +274,7 @@
 
 ;;; --- UNCONVERTED -------------------------------------
 
-
-
-
-
-
-
-
-(deftag tilton.fmx.factory/konly-for-builder-stateless layout-kid-builder w/LayoutBuilder)
+(deftag tilton.fmx.factory/konly-layout-builder layout-kid-builder w/LayoutBuilder)
 
 (deftag tilton.fmx.factory/konly-builder builder-ctx w/Builder)
 

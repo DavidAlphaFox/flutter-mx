@@ -84,7 +84,7 @@
     (init state ~'me)))
 
 (defn record-fx$state [me state]
-  (dp :recording-state (minfo me) (fn? state) #_#_cty/*defer-changes* cty/*within-integrity*)
+  (dpx :recording-state (minfo me) (fn? state) #_#_cty/*defer-changes* cty/*within-integrity*)
   (mx/with-cc :reco-state
     ;; todo does this need to be a cell?
     (mx/mset! me :fx$state state)))
@@ -162,7 +162,7 @@
   (when me
     (dpx :TGState-trying-above (minfo me))
     (if-let [^State? state (mget? me :fx$state)]
-      (do (dp :TGState-above-bingo (minfo me) (.-mounted state))
+      (do (dpx :TGState-above-bingo (minfo me) (.-mounted state))
           (trigger-state state me))
       (trigger-state-above (mpar)))))
 
@@ -171,7 +171,7 @@
    (trigger-state state nil))
   ([^State state me]
    (if (.-mounted state)
-     (do (dp :TGSTATE--BAM!!!! state (minfo me))
+     (do (dpx :TGSTATE--BAM!!!! state (minfo me))
          (.setState state (fn [] (do))))
      (dp :TRG-STATE_STATE_IGNORING_UNMOUNTED state (minfo me)))))
 
@@ -203,7 +203,7 @@
     (when-not (= prior-value cty/unbound)
       (when-not (some #{prop} [:parent :name :mx-type :on-quiesce :initState :fx-class :cells-flushed
                                :fx$state :fx$ikeys :fx$notifier :fx$observer :ui/a-ctx])
-        (dp :FXDartWidget-observing!!! (cinfo cell))
+        (dpx :FXDartWidget-observing!!! (cinfo cell))
         (dpx :FXDartWidget-observing!!! prop new-value prior-value (minfo me) (cinfo cell))
         (dpx :FXDartWidget-observing-md!!! prop (minfo me) #_#_:deref @me)
         (when true                                          ;; (= prop :kids)
@@ -372,6 +372,7 @@
                                (make-widget)))))))))
 
 (defmacro kids-kids [fx-class fx-props mx-props & children]
+  ;; mostly builder support.
   ;; hunh? There is no sign of a builder here! Correct, this might
   ;; have other uses, but for now it just handles the "builder" edge case where
   ;; subordinate "items", not "children", arise from nominal kids, via a callback.
@@ -411,7 +412,7 @@
                                  ~@(fx-props>mx fx-props))))))))))
        (tilton.mx.api/cFkids ~child))))
 
-(defmacro konly-for-builder-stateless [fx-class fx-props mx-props only-kid]
+(defmacro konly-layout-builder [fx-class fx-props mx-props only-kid]
   (let []
     `(tilton.fmx.factory/make-fx
        (new tilton.fmx.factory/FXDartWidget)
@@ -435,32 +436,6 @@
                                       `(tilton.fmx.api/fx-resolve-mget? ~'me ~k# ~'ctx)])]
                            (apply concat kvs))))))
        (tilton.mx.api/cFkids ~only-kid))))
-
-(defmacro childless-stateful [fx-class fx-props mx-props]
-  (let []
-    `(tilton.fmx.factory/make-fx-dart-widget
-       ~fx-props
-       (assoc ~mx-props
-         :fx-class (quote ~fx-class)
-         :fx-gen (fn ~(fx-class-sym fx-class) [~'me ~'ctx]
-                   (dp :genning-childless-stateful (minfo ~'me))
-                   (reify :extends (m/StatefulWidget
-                                     .key (tilton.fmx.api/fx-resolve-mget? ~'me :key ~'ctx))
-                     (~'createState [_#]
-                       (reify :extends w/State
-                         (^void ~'initState [this]
-                           (dp :childless-stateful-istate (quote ~fx-class) :state this)
-                           (tilton.fmx.factory/fx-state-init ~'me this))
-                         (~'build [_# ~'ctx]
-                           (tilton.fmx.factory/with-flutter-ref
-                             (~fx-class
-                               ~@(fx-props>mx fx-props))))))))))))
-
-
-;;; -------------------------------------------------------------
-
-(defmacro sized-box+expand-ful [fx-props mx-props & children]
-  `(tilton.fmx.factory/k1-child-stateful m/SizedBox.expand ~fx-props ~mx-props ~@children))
 
 ;;; --- next two not yet confirmed in practice
 (defmacro positioned [fx-props mx-props & children]
