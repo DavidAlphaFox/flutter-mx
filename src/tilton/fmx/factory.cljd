@@ -294,6 +294,7 @@
     :else (do
             (dp :GENGEN-stateless-nobuilder (minfo me))
             (widget-maker me ctx))))
+
 (defmacro konly-prop-ex [target-prop-name fx-class fx-props mx-props & [only-kid]]
   ;; only-kid optional for, eg, AnimatedContainer, AlertDialog
   (let []
@@ -303,17 +304,17 @@
          :fx-class (quote ~fx-class)
          :fx-gen (fn fgen [~'me ctxtop#]
                    (dpx :konly-prop-fx-gen-sees (.-hashCode ctxtop#) ctxtop# (tilton.mx.api/minfo ~'me))
-                   (let [make-widget (fn [~'me ~'ctx]
-                                       (tilton.fmx.factory/with-flutter-ref
-                                         (dpx :make-widget-sees (.-hashCode ~'ctx) (tilton.mx.api/minfo ~'me))
-                                         (~fx-class
-                                           ; the prop...
-                                           ~(symbol (str "." (name target-prop-name)))
-                                           (tilton.fmx.api/fx-resolve :kid1 ~'me ~'ctx
-                                             (first (tilton.mx.api/mkids ~'me)))
-                                           ; other props
-                                           ~@(fx-props>mx fx-props))))]
-                     (gen-gen ~'me ctxtop# make-widget))))
+                   (gen-gen ~'me ctxtop#
+                     (fn [~'me ~'ctx]
+                       (tilton.fmx.factory/with-flutter-ref
+                         (dpx :make-widget-sees (.-hashCode ~'ctx) (tilton.mx.api/minfo ~'me))
+                         (~fx-class
+                           ; the prop...
+                           ~(symbol (str "." (name target-prop-name)))
+                           (tilton.fmx.api/fx-resolve :kid1 ~'me ~'ctx
+                             (first (tilton.mx.api/mkids ~'me)))
+                           ; other props
+                           ~@(fx-props>mx fx-props)))))))
        (tilton.mx.api/cFkids ~only-kid))))
 
 (defmacro konly-builder [fx-class fx-props mx-props only-kid]
