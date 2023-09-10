@@ -10,8 +10,7 @@
 
 (defn make-app []
   (fx/material-app
-    {:title                      "Drawer Demo"
-     :debugShowCheckedModeBanner false}
+    {:title "Drawer Demo"}
     (fx/scaffold
       {:appBar (fx/app-bar
                  {:title (m/Text "Drawer Demo")})
@@ -25,12 +24,14 @@
                          {:title (m/Text "Item 1")
                           :onTap (fx/in-my-context [me ctx]
                                    (fx/->CBAsIs
-                                     #(.pop (m/Navigator.of ctx))))})
+                                     #(.pop (m/Navigator.of ctx))))}
+                         {:with-builder-ctx true})
                        (fx/list-tile
                          {:title (m/Text "Item 2")
                           :onTap (fx/in-my-context [me ctx]
                                    (fx/->CBAsIs
-                                     #(.pop (m/Navigator.of ctx))))}))))}
+                                     #(.pop (m/Navigator.of ctx))))}
+                         {:with-builder-ctx true}))))}
       (fx/center
         (fx/text "My Ported Page!!")))))
 
