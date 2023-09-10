@@ -147,8 +147,16 @@
 (defn ctx-nav [ctx]
   (m/Navigator.of ctx))
 
-(defmacro my-controller []
-  `^m/AnimationController? (tilton.mx.api/mget ~'me :controller))
+(defmacro my-controller [tag]
+  `(let [con# (:controller (deref ~'me))]
+     (assert con# (str "my-controller " ~tag
+                    " sees no controller in " (minfo ~'me)
+                    " keys " (keys (deref ~'me))))
+     ^m/AnimationController con#))
+
+(defmacro my-controller? [tag]
+  `(let [con# (:controller (deref ~'me))]
+     `^m/AnimationController? con#))
 
 (defn standard-text-value-controller [me]
   ;; usage: (fx/text {:controller (cF (standard-text-value-controller me))}....
@@ -197,7 +205,7 @@
   (sized-box m/SizedBox)
   (opacity m/Opacity)
   (ink m/Ink)
-  (gesture-detector m/GestureDetector))
+  #_ (gesture-detector m/GestureDetector))
 
 (deftags tilton.fmx.factory/kidless-childless
   (app-bar m/AppBar)
@@ -251,6 +259,10 @@
 
 (defmacro sized-box+expand [fx-props mx-props & children]
           `(tilton.fmx.factory/k1-child-stateful m/SizedBox.expand ~fx-props ~mx-props ~@children))
+
+
+(deftags tilton.fmx.factory/k1-child-stateful
+  (gesture-detector m/GestureDetector))
 
 (deftags-plus tilton.fmx.factory/kids-prop [:children]
   (stack m/Stack)

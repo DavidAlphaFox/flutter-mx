@@ -12,25 +12,13 @@
     [tilton.mx.api :refer [minfo cF cI make mget mpar cFkids fmu fmuv with-mx-isolation] :as mx]
     [tilton.fmx.api :as fx]))
 
-(defn logo-recoil [me ctx ^m/Offset px-per-s]
-  (let [size (.-size (MediaQuery/of ctx))
-        controller (fx/my-controller)
-        animation ^#/(m/Animation Alignment) (.drive controller
-                                               (m/AlignmentTween
-                                                 .begin (mget me :dragAlignment)
-                                                 .end m/Alignment.center))
-        units-per-s (m/Offset (/ (.-dx px-per-s) (.-width size))
-                      (/ (.-dy px-per-s) (.-height size)))
-        unit-velocity (.-distance units-per-s)
-        spring (p/SpringDescription
-                 .mass 30
-                 .stiffness 1
-                 .damping 1)
-        simulation (p/SpringSimulation spring 0 1 (- unit-velocity))]
-    (doto controller
-      .clearListeners
-      (.addListener #(mx/mset! me :dragAlignment (.-value animation))) ;; <==== dataflow trigger
-      (.animateWith simulation))))
+(defn make-app []
+  (let [title (str "Physics Animation")]
+    (fx/material-app {:title title}
+      (fx/scaffold
+        {:appBar (fx/app-bar {:title (fx/text title)})}
+        (draggable-card
+          :drag-child (fx/flutter-logo {:size 128.0} {}))))))
 
 (defn draggable-card [& {:keys [drag-child]}]
   (fx/ticker-mode
@@ -38,7 +26,9 @@
     (fx/gesture-detector
       {:onPanDown   (cF (fx/->CBAsIs
                           (fn [^m/DragDownDetails details]
-                            (when-let [c (fx/my-controller)]
+                            (let [c (fx/my-controller :panDown)]
+                              (assert c (str "Draggable-card pandown no controler in "
+                                          (minfo me)))
                               (.stop c)))))
        :onPanUpdate (fx/in-my-context [me ctx]
                       (fx/->CBAsIs
@@ -55,26 +45,37 @@
                             (fn [^m/DragEndDetails details]
                               (logo-recoil me ctx (-> details .-velocity .-pixelsPerSecond))))))}
       {:name          :draggo
+       :initState     (fn [state me]
+                        (dp :GESTURE-istate-sees state (minfo me))
+                        ;; todo dispose this controller
+                        (mx/rmap-set! [:controller me]
+                          (m/AnimationController .vsync state)))
        :dragAlignment (cI m/Alignment.center)
-       :controller    (cF (when-let [st (mget (mpar) :fx$state)]
-                            ;; todo search up for (dart/is? <state> w/TickerProvider)
-                            (dp :anicon-st-from (minfo (mpar)))
-                            (dp :anicon-st st)
-                            (dp :anicon-st-ticko? (dart/is? st w/TickerProvider))
-                            (m/AnimationController .vsync st)))
        :dispose       (fn [this me]
                         ;; todo test that this is being called
-                        (when-let [con (fx/my-controller)]
+                        (when-let [con (fx/my-controller? :dispose)]
                           (dp :x03-disposing!!! con)
                           (.dispose con)))}
       (fx/align
         {:alignment (cF (mx/mdv! :draggo :dragAlignment))}
         (fx/card drag-child)))))
 
-(defn make-app []
-  (let [title (str "Physics Animation")]
-    (fx/material-app {:title title}
-      (fx/scaffold
-        {:appBar (fx/app-bar {:title (fx/text title)})}
-        (draggable-card
-          :drag-child (fx/flutter-logo {:size 128.0} {}))))))
+(defn logo-recoil [me ctx ^m/Offset px-per-s]
+  (let [size (.-size (MediaQuery/of ctx))
+        controller (fx/my-controller :recoil)
+        animation ^#/(m/Animation Alignment) (.drive controller
+                                               (m/AlignmentTween
+                                                 .begin (mget me :dragAlignment)
+                                                 .end m/Alignment.center))
+        units-per-s (m/Offset (/ (.-dx px-per-s) (.-width size))
+                      (/ (.-dy px-per-s) (.-height size)))
+        unit-velocity (.-distance units-per-s)
+        spring (p/SpringDescription
+                 .mass 30
+                 .stiffness 1
+                 .damping 1)
+        simulation (p/SpringSimulation spring 0 1 (- unit-velocity))]
+    (doto controller
+      .clearListeners
+      (.addListener #(mx/mset! me :dragAlignment (.-value animation))) ;; <==== dataflow trigger
+      (.animateWith simulation))))

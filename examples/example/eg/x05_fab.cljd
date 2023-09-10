@@ -34,7 +34,7 @@
      ; --- Dart lifecycle ---------------------------
      ;; todo how does this ever run?
      :dispose          (fn [this me]
-                         (when-let [controller (fx/my-controller)]
+                         (when-let [controller (fx/my-controller? :dispo)]
                            (.dispose controller)))
      ; --- animation mechanics ----------------------
      :controller       (cF (fx/when-my-state [state]
@@ -43,17 +43,15 @@
                                .value (if initial-open? 1.0 0.0)
                                .duration (dart:core/Duration .milliseconds 250)
                                .vsync state)))
-     :expand-animation (cF (when-let [c (fx/my-controller)]
-                             (dp :BAM-controller!!!)
-                             (m/CurvedAnimation
-                               .curve m/Curves.fastOutSlowIn
-                               .reverseCurve m/Curves.easeOutQuad
-                               .parent c)))
+     :expand-animation (cF (m/CurvedAnimation
+                             .curve m/Curves.fastOutSlowIn
+                             .reverseCurve m/Curves.easeOutQuad
+                             .parent (fx/my-controller :expand-ani)))
      ; --- behavior -------------------------
      :step             (/ 90.0 (dec (count actions)))
      :open?            (cI initial-open?)
      :ani-dir          (cF+ [:watch (fn [prop-name me new-value prior-value cell]
-                                      (when-let [c (fx/my-controller)]
+                                      (when-let [c (fx/my-controller? :ani-dir)]
                                         (case new-value
                                           :forward (.forward c)
                                           :reverse (.reverse c))))]
