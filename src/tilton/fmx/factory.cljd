@@ -168,13 +168,14 @@
         (do
           ;; todo expand on this message
           (dp :TRG-WARNING!!!!!!-cannot-set-state!!! :cell (cinfo cell) :of (minfo me))
-          #_(trigger-state-above (mpar)))))))
+          (dp :TRG-state-trying-above!!! :cell (cinfo cell) :of (minfo me))
+          (trigger-state-above (mpar)))))))
 
 (defn trigger-state-above [me]
   (when me
-    (dpx :TGState-trying-above (minfo me))
+    (dp :TGState-trying-above (minfo me))
     (if-let [^State? state (mget? me :fx$state)]
-      (do (dpx :TGState-above-bingo (minfo me) (.-mounted state))
+      (do (dp :TGState-above-bingo (minfo me) (.-mounted state))
           (trigger-state state me))
       (trigger-state-above (mpar)))))
 

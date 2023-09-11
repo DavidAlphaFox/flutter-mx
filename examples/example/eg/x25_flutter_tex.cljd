@@ -21,7 +21,6 @@
 (defn make-app []
   (material-app
     {:title                      "Flutter TeX Demo"
-     :debugShowCheckedModeBanner false
      :theme                      (m/ThemeData .primarySwatch
                                    m/Colors.red)}
     (scaffold
@@ -30,8 +29,16 @@
       (center
         (column
           {:mainAxisAlignment m/MainAxisAlignment.spaceEvenly}
+          (m/Text "bam")
+          (m/Text "boom")
           (tk/TeXView
-            .child (tk/TeXViewColumn
+            .child (tk/TeXViewDocument "<h2>MathPaper&trade;</h2>"
+                     .style (tk/TeXViewStyle
+                              .backgroundColor m/Colors.grey
+                              .contentColor m/Colors.white
+                              .textAlign tk.TeXViewTextAlign/center))
+
+            #_ (tk/TeXViewColumn
                      .children
                      [(tk/TeXViewInkWell
                         .id "id_0"

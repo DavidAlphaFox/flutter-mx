@@ -37,5 +37,6 @@
     #_ [example.eg.flutter-tts :as tts]))
 
 (defn select []
-  (x09i/make-app))
+  ;; NG: to-do
+  (tek/make-app))
 

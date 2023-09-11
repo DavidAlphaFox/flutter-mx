@@ -184,7 +184,7 @@
                             ;; we must yield a native Flutter widget ready for Flutter, so we must "render" here,
                             (fx/fx-render ctx
                               (nth (mkids me) i)))))}
-      {:name :lv-builder}
+      {:name :lv-builder :hack (cI 423)}
       (map (fn [todo]
              (let [stg-id (td-stg-id todo)
                    exg (some (fn [li]
