@@ -14,7 +14,7 @@
     (fx/material-app
       {:title title}
       {:name    :the-app
-       :msg     "\"Hi, mom!\" "
+       :msg     "\"Hi, Mom!\" "
        :elapsed (cI 0)
        #_#_:clock (cF+ [:on-quiesce (fn [cell]
                                       (when-let [tmr ^async/Timer (cb/c-value cell)]

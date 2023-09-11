@@ -31,12 +31,12 @@
     ;[example.eg.x029_layout_builder :as x029]
     [example.eg.x030_codelab_namer :as x030]
     [example.eg.x035-timer-poll :as x035]
-    ;[example.eg.x040-named-routes :as x040]
+    [example.eg.x040-named-routes :as x040]
     [example.eg.x029a-layout-kid-builder :as x029]
     [example.eg.flutter-layout-tutorial :as dlayout]
-    #_ [example.eg.flutter-tts :as tts]))
+    [example.eg.flutter-tts :as tts]))
 
 (defn select []
-  ;; NG: to-do
-  (tek/make-app))
+  ;; NG: to-do, tek/x26, tts
+  (tts/make-app))
 

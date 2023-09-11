@@ -184,7 +184,7 @@
    (trigger-state state nil))
   ([^State state me]
    (if (.-mounted state)
-     (do (dpx :TGSTATE--BAM!!!! state (minfo me))
+     (do (dp :TGSTATE--BAM!!!! state (minfo me))
          (.setState state (fn [] (do))))
      (dp :TRG-STATE_STATE_IGNORING_UNMOUNTED state (minfo me)))))
 

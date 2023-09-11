@@ -32,13 +32,7 @@
           (m/Text "bam")
           (m/Text "boom")
           (tk/TeXView
-            .child (tk/TeXViewDocument "<h2>MathPaper&trade;</h2>"
-                     .style (tk/TeXViewStyle
-                              .backgroundColor m/Colors.grey
-                              .contentColor m/Colors.white
-                              .textAlign tk.TeXViewTextAlign/center))
-
-            #_ (tk/TeXViewColumn
+            .child (tk/TeXViewColumn
                      .children
                      [(tk/TeXViewInkWell
                         .id "id_0"

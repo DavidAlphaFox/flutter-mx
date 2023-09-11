@@ -65,7 +65,7 @@
        :langs (cF+ [:watch (fn [_ _ new _ _]
                              (dp :langs-watch new))]
                 (sort (keys (mget (fasc :app) :lang-geo-tree))))
-       :value (cI 7)
+       :value (cI 1)
        :lang-code (cF (when-let [langs (seq (mget me :langs))]
                         (dp :langs???? langs)
                         (nth langs (mget me :value))))}
@@ -87,7 +87,7 @@
                             {:style (p/TextStyle .color m/Colors.black
                                       .fontSize 16.0)}
                             (subs (nth langs i) 0 2)))))))
-          (range (count langs)))))))
+          (range (count (take 3 langs))))))))
 
 (defn geo-chooser []
   (expanded
