@@ -159,25 +159,35 @@
 (defn trigger-build [me cell]
   (when-not *fx-building?*
     (if-let [^State? state (mget? me :fx$state)]
-      (do (dpx :FXDWO-settingimmediatestate (minfo me) (.-mounted state) (cinfo cell))
+      (do (dpx :TRG-build-settingimmediatestate (minfo me) (.-mounted state) (cinfo cell))
           (trigger-state state me))
       (if-let [state-setter (:fx$state-setter (meta me))]
         (do
-          (dpx :TRG-using-state-setter!!!!!!!!! (minfo me) (cinfo cell))
+          (dpx :TRG-build-using-state-setter!!!!!!!!! (minfo me) (cinfo cell))
           (state-setter (fn [] (do))))
         (do
           ;; todo expand on this message
-          (dp :TRG-WARNING!!!!!!-cannot-set-state!!! :cell (cinfo cell) :of (minfo me))
-          (dp :TRG-state-trying-above!!! :cell (cinfo cell) :of (minfo me))
+          (dpx :TRG-WARNING!!!!!!-cannot-set-state!!! :cell (cinfo cell) :of (minfo me))
+          (dpx :TRG-state-trying-above!!! :cell (cinfo cell) :of (minfo me))
           (trigger-state-above (mpar)))))))
 
 (defn trigger-state-above [me]
+  ;; todo DRY with trigger-state
+  (when-not me
+    (dp :TRG-ABOVE-WARNING!!!!!!-setstate-above-topped-out))
   (when me
-    (dp :TGState-trying-above (minfo me))
+    ;; todo why is :fx$state in me but fx$state-setter in meta
     (if-let [^State? state (mget? me :fx$state)]
-      (do (dp :TGState-above-bingo (minfo me) (.-mounted state))
+      (do (dpx :TRG-ABOVE-bingo (minfo me) (.-mounted state))
           (trigger-state state me))
-      (trigger-state-above (mpar)))))
+      (if-let [state-setter (:fx$state-setter (meta me))]
+        (do
+          (dpx :TRG-ABOVE-using-state-setter-of!!!!!!!!! (minfo me))
+          (state-setter (fn [] (do))))
+        (do
+          ;; todo expand on this message
+          (dpx :TRG-state-trying-above!!!  (minfo me))
+          (trigger-state-above (mpar)))))))
 
 (defn trigger-state
   ([^State state]
@@ -229,6 +239,8 @@
         (trigger-build me cell)))))
 
 (defn gen-gen [me ctx widget-maker]
+  #_ (when (tilton.mx.model.core/md-reactive? me)
+    (dp :GENGEN-entry (tilton.mx.model.core/md-reactive? me) (minfo me)))
   (cond
     (tilton.mx.model.core/md-reactive? me)
     (do (dpx :GENGEN-reactive (minfo me))
@@ -258,6 +270,27 @@
                    (tilton.fmx.factory/gen-gen me# ctxtop#
                      (fn [~'me ~'ctx]
                        (dpx :konly-prop ~target-prop-name (tilton.mx.api/minfo ~'me))
+                       (~fx-class
+                         ; the prop...
+                         ~(symbol (str "." (name target-prop-name)))
+                         (tilton.fmx.api/fx-resolve :kid1 ~'me ~'ctx
+                           (first (tilton.mx.api/mkids ~'me)))
+                         ; other props
+                         ~@(fx-props>mx fx-props))))))
+       (tilton.mx.api/cFkids ~only-kid))))
+
+(defmacro konly-prop-scaffo [target-prop-name fx-class fx-props mx-props & [only-kid]]
+  ;; only-kid optional for, eg, AnimatedContainer, AlertDialog
+  (let []
+    `(tilton.fmx.factory/make-fx-dart-widget
+       ~fx-props
+       (assoc ~mx-props
+         :fx-class (quote ~fx-class)
+         :fx-gen (fn fgen [me# ctxtop#]
+                   (dp :konly-prop-fx-gen-sees (.-hashCode ctxtop#) ctxtop# (tilton.mx.api/minfo me#))
+                   (tilton.fmx.factory/gen-gen me# ctxtop#
+                     (fn [~'me ~'ctx]
+                       (dp :konly-prop ~target-prop-name (tilton.mx.api/minfo ~'me))
                        (~fx-class
                          ; the prop...
                          ~(symbol (str "." (name target-prop-name)))
