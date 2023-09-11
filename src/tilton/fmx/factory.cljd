@@ -81,11 +81,10 @@
 (defn fx-state-init [me state]
   (tilton.fmx.factory/record-fx$state me state)
   (when-let [init (tilton.mx.api/mget? me :initState)]
-    (dp :BAM-istate!!!!!!!!! init)
     (init state me)))
 
 (defn record-fx$state [me state]
-  (dp :recording-state (minfo me) (fn? state) #_#_cty/*defer-changes* cty/*within-integrity*)
+  (dpx :recording-state (minfo me) (fn? state) #_#_cty/*defer-changes* cty/*within-integrity*)
   (mx/with-cc :reco-state
     ;; todo does this need to be a cell?
     (mx/mset! me :fx$state state)))
@@ -95,7 +94,7 @@
   (rmap-meta-set! [:fx$state-setter me] state-setter))
 
 (defn fx-state-nearest [me]
-  (dpx :state-nearest-entry (tilton.mx.cell.base/minfo me))
+  (dp :state-nearest-entry (mx/minfo me))
   (when me
     (if-let [st ^State? (mget? me :fx$state)]
       (do (dpx :nearest-st-bingo-from (minfo me))
@@ -106,6 +105,17 @@
         ;; todo memoize instead
         ;; (mx/mset! me :fx$state st)                            ;; for next time
         st))))
+
+;      ; (let [depth (atom 0)]
+;     ;  (dp :visA-TOP! @depth (.-hashCode ctx) (dart/is? ctx m/BuildContext) ctx)
+;     ;  (.visitAncestorElements ^m/BuildContext ctx
+;     ;    (fn [elt]
+;     ;      (cond
+;     ;        elt (do
+;     ;              (dp :visA! @depth (.-hashCode elt) (dart/is? elt m/BuildContext) elt)
+;     ;              (swap! depth inc)
+;     ;              (< @depth 32))
+;     ;        :else false))))
 
 ;;; --- make fx ------------------------------------------
 
@@ -136,6 +146,7 @@
 
 (def ^:dynamic *fx-building?* false)
 
+#_
 (defn mark-rebuild [^w/Element elt me cell]
   ;; (dp :MNBuild-entry (minfo me) :elt  elt #_ (deref *fmx-debugger*))
   (when-let [cb (deref *fmx-debugger*)]
@@ -156,7 +167,7 @@
           (state-setter (fn [] (do))))
         (do
           ;; todo expand on this message
-          (dpx :TRG-WARNING!!!!!!-cannot-set-state!!! :cell (cinfo cell) :of (minfo me))
+          (dp :TRG-WARNING!!!!!!-cannot-set-state!!! :cell (cinfo cell) :of (minfo me))
           #_(trigger-state-above (mpar)))))))
 
 (defn trigger-state-above [me]
@@ -210,6 +221,7 @@
         (when true                                          ;; (= prop :kids)
           (dpc cell :quiesce :FXDartWidget-observing-cell-change!!! prop))
         (when-let [noter (mget? me :fx$notifier)]
+          ;; todo lose this? use more places
           (.notifyListeners ^m/ChangeNotifier noter))
         (md-quiesce-lost! cell new-value prior-value)
 
@@ -221,7 +233,7 @@
     (do (dpx :GENGEN-reactive (minfo me))
         (w/StatefulBuilder
           .builder (fn [ctx set-state-cb]
-                     (dp :stateful-builder-sees (.-hashCode ctx) (tilton.mx.api/minfo me))
+                     (dpx :stateful-builder-sees (.-hashCode ctx) (tilton.mx.api/minfo me))
                      (tilton.fmx.factory/record-fx$state-setter me set-state-cb)
                      (widget-maker me ctx))))
     (tilton.mx.api/mget? me :with-builder-ctx)
@@ -244,7 +256,7 @@
                    (dpx :konly-prop-fx-gen-sees (.-hashCode ctxtop#) ctxtop# (tilton.mx.api/minfo me#))
                    (tilton.fmx.factory/gen-gen me# ctxtop#
                      (fn [~'me ~'ctx]
-                       (dp :konly-prop ~target-prop-name (tilton.mx.api/minfo ~'me))
+                       (dpx :konly-prop ~target-prop-name (tilton.mx.api/minfo ~'me))
                        (~fx-class
                          ; the prop...
                          ~(symbol (str "." (name target-prop-name)))
@@ -375,7 +387,7 @@
                          (^void ~'initState [this]
                            (tilton.fmx.factory/fx-state-init ~'me this))
                          (~'build [_# ~'ctx]
-                           (dp :OSK-k1-child-stateful!!!!!!!!!!!!! (tilton.mx.api/minfo ~'me))
+                           (dpx :OSK-k1-child-stateful!!!!!!!!!!!!! (tilton.mx.api/minfo ~'me))
                            (let [k1# (tilton.fmx.api/fx-resolve :kid1 ~'me ~'ctx
                                        (first (tilton.mx.model.core/mkids ~'me)))]
                              (~fx-class .child k1#

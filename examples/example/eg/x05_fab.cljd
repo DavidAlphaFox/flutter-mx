@@ -28,25 +28,34 @@
          :itemBuilder (fn [ctx i] (fake-item (odd? i)))}))))
 
 (defn expandable-fab [& {:keys [initial-open? distance actions] :or {initial-open? false}}]
-  (let [fab (fx/sized-box+expand
+  (fx/sized-box+expand
     {}                                                      ;; <= necessary placeholder
     {:name             :fab
      ; --- Dart lifecycle ---------------------------
-     ;; todo how does this ever run?
-     :dispose          (fn [this me]
-                         (when-let [controller (fx/my-controller? :dispo)]
+     :initState     (fn [state me]
+                      ;; todo dispose this controller
+                      (let [cont (mx/rmap-set! [:controller me]
+                                   (m/AnimationController
+                                     .value (if initial-open? 1.0 0.0)
+                                     .duration (dart:core/Duration .milliseconds 250)
+                                     .vsync state))]
+                        (mx/rmap-set! [:expand-animation me]
+                          (m/CurvedAnimation
+                            .curve m/Curves.fastOutSlowIn
+                            .reverseCurve m/Curves.easeOutQuad
+                            .parent cont))))
+     ;; todo how does this next ever run?
+     :dispose          (fn [state me]
+                         (when-let [controller ^m/AnimationController (fx/my-controller? :dispo)]
                            (.dispose controller)))
      ; --- animation mechanics ----------------------
-     :controller       (cF (fx/when-my-state [state]
-                             (dp :BAM-state!!!)
-                             (m/AnimationController
-                               .value (if initial-open? 1.0 0.0)
-                               .duration (dart:core/Duration .milliseconds 250)
-                               .vsync state)))
-     :expand-animation (cF (m/CurvedAnimation
-                             .curve m/Curves.fastOutSlowIn
-                             .reverseCurve m/Curves.easeOutQuad
-                             .parent (fx/my-controller :expand-ani)))
+
+     ; unrelated: retrieve state with some findAncestor tool
+     ; WHY? we do not search up for state anywhere?
+     ; (#/(.getElementForInheritedWidgetOfExactType InheritedBindings) ~closest-context)
+     ; ScrollableState? scrollable = context.findAncestorStateOfType<ScrollableState>();
+     ; (#/(.findAncestorStateOfType State) ^m/BuildContext ctx)
+
      ; --- behavior -------------------------
      :step             (/ 90.0 (dec (count actions)))
      :open?            (cI initial-open?)
@@ -57,31 +66,28 @@
                                           :reverse (.reverse c))))]
                          (if (mget me :open?)
                            :forward :reverse))}
-    (when-let [anime (mget me :expand-animation)]
-      (dp :FAB_GUTS!!!!!!!!!!!!!!!!!)
-      (fx/stack
-        {:alignment    m/Alignment.bottomRight
-         :clipBehavior m/Clip.none}
-        {:name :fab-stack}
-        (tap-to-close-fab me)
-        ;; Matrix always flattens children, and discards nils, so we can offer a collection mid-children
-        (doall (map-indexed
-                 (fn [i action]
-                   (expanding-action-button me anime
-                     :direction-degrees (* i #_ 30.0 (fmuv :fab :step))
-                     :max-distance distance
-                     :progress-key :expand-animation
-                     :action action))
-                 actions))
-        (tap-to-open-fab me))))]
-    (dp :genned-fab-fx!!!! (minfo fab))
-    fab))
+    (fx/stack
+      {:alignment    m/Alignment.bottomRight
+       :clipBehavior m/Clip.none}
+      {:name :fab-stack}
+      (tap-to-close-fab me)
+      ;; Matrix always flattens children, and discards nils, so we can offer a collection mid-children
+      (doall (map-indexed
+               (fn [i action]
+                 (expanding-action-button me
+                   :direction-degrees (* i #_ 30.0 (fmuv :fab :step))
+                   :max-distance distance
+                   :progress-key :expand-animation
+                   :action action))
+               actions))
+      (tap-to-open-fab me))))
 
-(defn expanding-action-button [me anime & {:keys [action direction-degrees max-distance progress-key]}]
+(defn expanding-action-button [me & {:keys [action direction-degrees max-distance progress-key]}]
   (fx/animated-builder
-    {:animation anime                                       ;; (mget (mx/fasc :fab) :expand-animation)
+    {:animation (fx/in-my-context [me ctx]
+                  (fx/state-prop-get (mx/fasc :fab) :expand-animation))
      :builder   (as-dart-callback [ctx child]
-                  (let [progress ^m/CurvedAnimation anime #_(mget me :animation) #_(mget (mx/fasc :fab) :expand-animation)
+                  (let [progress ^m/CurvedAnimation (fx/state-prop-get (mx/fasc :fab) :expand-animation)
                         offset (m/Offset.fromDirection
                                  (* direction-degrees (/ math/pi 180.00))
                                  (* (.-value progress) max-distance))]
@@ -97,12 +103,15 @@
                         child))))}
     {:name :ani-builder}
     (fx/fade-transition
-      {:opacity anime #_(mget (mx/fasc :fab) :expand-animation)}
+      {:opacity (fx/in-my-context [me ctx]
+                  (fx/state-prop-get (mx/fasc :fab) :expand-animation))}
       (action-button
         :icon (:icon action)
         :onPressed (fx/in-my-context [me ctx]
                      (fx/->CBAsIs
                        #(show-action ctx action)))))))
+
+;;; -----------------------------------------------------------------
 
 (defn show-action [ctx action]
   (m/showDialog

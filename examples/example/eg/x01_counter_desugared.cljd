@@ -44,7 +44,6 @@
                    :floatingActionButton (cF (floating-action-button
                                                ;; todo get this working without cF
                                                {:onPressed (as-dart-callback []
-                                                             (dp :ADC!!!!! (minfo me) (minfo (mpar me)))
                                                              (mswap! (fm* :scaffo) :counter inc))
                                                 :tooltip   "Increment"}
                                                (m/Icon m/Icons.add)))}

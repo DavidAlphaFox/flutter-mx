@@ -16,7 +16,7 @@
     [example.eg.x10-datatable :as x10]
     [example.eg.x11-grid-list :as x11]
     [example.eg.x12-gesture-detector :as x12]
-    [example.eg.x13-snackbar :as x13] ;; todo fx-gen leftover
+    [example.eg.x13-snackbar :as x13]
     [example.eg.x14-hero :as hero]
     [example.eg.x15-fade-widget :as fade]
     [example.eg.x020-reactive-stream :as x020]
@@ -37,5 +37,5 @@
     #_ [example.eg.flutter-tts :as tts]))
 
 (defn select []
-  (x04/make-app))
+  (x05/make-app))
 

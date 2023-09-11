@@ -46,14 +46,13 @@
                               (logo-recoil me ctx (-> details .-velocity .-pixelsPerSecond))))))}
       {:name          :draggo
        :initState     (fn [state me]
-                        (dp :GESTURE-istate-sees state (minfo me))
                         ;; todo dispose this controller
                         (mx/rmap-set! [:controller me]
                           (m/AnimationController .vsync state)))
        :dragAlignment (cI m/Alignment.center)
        :dispose       (fn [this me]
                         ;; todo test that this is being called
-                        (when-let [con (fx/my-controller? :dispose)]
+                        (when-let [con ^m/AnimationController? (fx/my-controller? :dispose)]
                           (dp :x03-disposing!!! con)
                           (.dispose con)))}
       (fx/align

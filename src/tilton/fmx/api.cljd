@@ -126,7 +126,7 @@
                        (dp :render-sees-not-mref?-passing-thru fx))
                    fx))
       :else (let [gen (mget fx :fx-gen)]
-              (dp :fx-render-sees-gen!! (minfo fx))
+              (dpx :fx-render-sees-gen!! (minfo fx))
               (chk gen "OBAD: fx-render of model finds no fx-gen: ")
               ;;(dp :fx-render-records (minfo fx) ctx)
               ;; nope (fxf/record-fx$ctx fx ctx)
@@ -156,7 +156,18 @@
 
 (defmacro my-controller? [tag]
   `(let [con# (:controller (deref ~'me))]
-     `^m/AnimationController? con#))
+     ^m/AnimationController? con#))
+
+(defn state-prop-get [me prop-key]
+  (assert (contains? (deref me) prop-key)
+    (str "my-state-prop> prop key " prop-key
+      " not contained by fx/state of " (tilton.mx.api/minfo me)))
+  (get (deref me) prop-key))
+
+(defmacro my-state-prop [prop-key]
+  `(do (assert (contains? ~'me ~prop-key) (str "my-state-prop> prop key " ~prop-key
+                                           " not contained by fx/state of " (tilton.mx.api/minfo ~'me)))
+       (get (deref ~'me) ~prop-key)))
 
 (defn standard-text-value-controller [me]
   ;; usage: (fx/text {:controller (cF (standard-text-value-controller me))}....

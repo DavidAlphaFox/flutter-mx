@@ -56,7 +56,7 @@
                                               (.cancel tmr)))]
                           (async/Timer.periodic (Duration .seconds 3)
                             (fn [^async/Timer tmr]
-                              (dp :tmr-fires!!!! (.-tick tmr)(minfo me))
+                              ;(dp :tmr-fires!!!! (.-tick tmr)(minfo me))
                               (mset! (fmu :counter) :value (.-tick tmr)))))}
                 "Making fetch #")))
           (fx/text
