@@ -38,5 +38,5 @@
 
 (defn select []
   ;; NG: tek/x26, tts
-  (hero/make-app))
+  (counter/make-app))
 

@@ -221,13 +221,15 @@
 (deftags tilton.fmx.factory/kidless-childless
   (app-bar m/AppBar)
   (data-table m/DataTable)
-  (text-style p/TextStyle)
-  (rounded-rectangle-border p/RoundedRectangleBorder)
   (list-tile m/ListTile)
   (layout-builder w/LayoutBuilder)
   (flutter-logo m/FlutterLogo)
-  (bottom-navigation-bar-item w/BottomNavigationBarItem)
   (navigation-rail-destination w/NavigationRailDestination))
+
+(deftags tilton.fmx.factory/non-widget ;; todo better name
+  (text-style p/TextStyle)
+  (bottom-navigation-bar-item w/BottomNavigationBarItem)
+  (rounded-rectangle-border p/RoundedRectangleBorder))
 
 (deftags tilton.fmx.factory/kidless-childless
   (slider m/Slider)
