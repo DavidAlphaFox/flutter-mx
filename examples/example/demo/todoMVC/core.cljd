@@ -22,11 +22,10 @@
 ;;;;;; --- the app --------------------------------------------------------
 
 (defn make-app []
-  (let [title "todo"]
+  (let [title "todo 5"]
     (fx/material-app
-      {:title                      title
-       :theme                      app-theme
-       :debugShowCheckedModeBanner true}
+      {:title title
+       :theme app-theme}
       {:name      :app
        :db        (cF+ [:async? true
                         :watch (fn [_ me hv-box _ _]
@@ -39,14 +38,17 @@
                         (todo/make-ToDoList "todo"
                           (stg/collection-docs "todo"))))}
       (fx/scaffold
-        {:appBar                  (todo-app-bar title)
+        {:appBar      #_(m/PreferredSize
+                          .preferredSize (.fromHeight m/Size 72)
+                          .child (m/AppBar :title (m/Text "PLAIN 3")))
+         (todo-app-bar title)
          :persistentFooterButtons [(todos-dashboard)]}
         ;; {:dummy (cI 42)}
         (fx/ink {:color m/Colors.white}
-          (fx/column
-            (input/todo-controls)
-            (items/todo-items)
-            (about-credits)))))))
+            (fx/column
+              (input/todo-controls)
+              (items/todo-items)
+              (about-credits)))))))
 
 ;;; --- the app bar -----------------------------------------------
 (defn todo-app-bar [title]
@@ -60,7 +62,7 @@
                                                 .fontFamily "Helvetica Neue"
                                                 .color (cmm/title-red)
                                                 .fontWeight m/FontWeight.w100
-                                                .fontSize 64.0)}
+                                                .fontSize 40.0 #_ 64.0)}
                                       title))})))
 
 ;;; --- footer filters -------------------------------------------------

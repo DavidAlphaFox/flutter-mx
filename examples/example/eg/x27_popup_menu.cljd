@@ -75,7 +75,7 @@
      :theme (m/ThemeData .primarySwatch m/Colors.blue)}
     (fx/scaffold
       {:appBar (fx/app-bar
-                 {:title (m/Text "Flutter/MX Popup")})}
+                 {:title (m/Text "Flutter/MX Popup 2")})}
       (fx/center {}
         {:name  :demo
          :sound (cI nil :ephemeral? true)}

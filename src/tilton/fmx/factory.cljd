@@ -35,7 +35,7 @@
 
 (defn call-with-flutter-ref [me ctx factory]
   (let [ref (factory)]
-    (dpx :flutter-ref-built!!!!!!! (.-hashCode ctx) (minfo me) (dart/is? ref m/Widget) ref)
+    ;; (dp :flutter-ref-built!!!!!!! (.-hashCode ctx) (minfo me) (dart/is? ref m/Widget) ref)
     (tilton.fmx.factory/ctx-check me ctx)
     (rmap-meta-set! [:fx$flutter-ref me] ref)
     ref))
@@ -53,7 +53,6 @@
 
 (defn record-fx$ctx [me ctx]
   ;(dp :record-CTX! (minfo me) ctx)
-  ;(dp :record-CTX!-state (minfo me) (.-state ctx))
   (mx/rmap-meta-set! [:fx$ctx me] ctx))
 
 (defn ctx-check
@@ -157,33 +156,59 @@
     #_(.markNeedsBuild elt)))
 
 (defn trigger-build [me cell]
-  (when-not *fx-building?*
+  (when-not *fx-building?* ;; todo vestigial?
     (if-let [^State? state (mget? me :fx$state)]
-      (do (dpx :TRG-build-settingimmediatestate (minfo me) (.-mounted state) (cinfo cell))
-          (trigger-state state me))
+      (if (.-mounted state)
+        (do (dpx :TRG-build-settingimmediatestate (minfo me)  (cinfo cell))
+            (trigger-state state me))
+        (dpx :TRG-build-settingimmediatestate-UNMOUNTED!! (minfo me) (.-mounted state) (cinfo cell)))
       (if-let [state-setter (:fx$state-setter (meta me))]
+        (let [ctx (:fx$ctx (meta me))]
+          (dpx :TRG-stateful-ctx!!!!!  ctx (.-debugIsDefunct ctx) (minfo me) )
+          ;;(dp :TRG-ctx=state!!!!!  (.-state ctx)  )
+          ;(dp :TRG-stateful-ctx!!!!!  (minfo me) ctx :state (.-state ctx) (.-mounted (.-state ctx)))
+          ;(dp :TRG-build-sees-ancestor-st (#/(.findAncestorStateOfType State) ^m/Widget widget))
+
+          (if (not (.-debugIsDefunct ctx))
+            (do (dpx :TRG-build-using-state-setter!!!!!!!!!  (minfo me))
+                (state-setter (fn [] (do))))
+            (dpx :TRG-not-using-unmounted-state-setter!!!!!!!!!  (minfo me))))
         (do
-          (dpx :TRG-build-using-state-setter!!!!!!!!! (minfo me) (cinfo cell))
-          (state-setter (fn [] (do))))
-        (do
-          ;; todo expand on this message
-          (dpx :TRG-WARNING!!!!!!-cannot-set-state!!! :cell (cinfo cell) :of (minfo me))
-          (dpx :TRG-state-trying-above!!! :cell (cinfo cell) :of (minfo me))
+          (dpx :TRG-state-trying-above!!! (minfo me) :cause (cinfo cell) (minfo me))
           (trigger-state-above (mpar)))))))
 
 (defn trigger-state-above [me]
-  ;; todo DRY with trigger-state
+  ;; todo DRY with trigger-statecc
   (when-not me
-    (dp :TRG-ABOVE-WARNING!!!!!!-setstate-above-topped-out))
+    (dpx :TRG-ABOVE-WARNING!!!!!!-setstate-above-topped-out))
   (when me
     ;; todo why is :fx$state in me but fx$state-setter in meta
     (if-let [^State? state (mget? me :fx$state)]
-      (do (dpx :TRG-ABOVE-bingo (minfo me) (.-mounted state))
-          (trigger-state state me))
+      (if (.-mounted state)
+        (do (dp :TRG-ABOVE-bingo (minfo me))
+            (trigger-state state me))
+        (dpx :TRG-ABOVE-UNMOUNTED!! (minfo me)))
       (if-let [state-setter (:fx$state-setter (meta me))]
-        (do
-          (dpx :TRG-ABOVE-using-state-setter-of!!!!!!!!! (minfo me))
-          (state-setter (fn [] (do))))
+        (let [ctx (:fx$ctx (meta me))]
+          (dpx :TRG-ABOVE-stateful-ctx!!!!!  ctx (minfo me) )
+
+          ; the problem is hot reload leaves the app broken
+          ; witness the lack of blinking caret
+          ; can we do our own stateful builder extending stateful widget odskool?
+
+
+
+
+          ;(dp :TRG-ctx=state!!!!!  (.-state ctx)  (.-mounted (.-state ctx)))
+          ;(dp :TRG-stateful-ctx!!!!!  (minfo me) ctx :state (.-state ctx) (.-mounted (.-state ctx)))
+          ;(dp :TRG-build-sees-ancestor-st (#/(.findAncestorStateOfType State) ^m/Widget widget))
+
+          (if (.-debugIsDefunct ctx)
+            (do
+              (dp :TRG-not-using-unmounted-state-setter!!!!!!!!!  (minfo me))
+              (trigger-state-above (mpar)))
+            (do (dpx :TRG-build-using-state-setter!!!!!!!!!  (minfo me))
+                (state-setter (fn [] (do))))))
         (do
           ;; todo expand on this message
           (dpx :TRG-state-trying-above!!!  (minfo me))
@@ -225,7 +250,7 @@
     (dpx :fxdw-obs prop)
     (when-not (= prior-value cty/unbound)
       (when-not (some #{prop} [:parent :name :mx-type :on-quiesce :initState :fx-class :cells-flushed
-                               :fx$state :fx$ikeys :fx$notifier :fx$observer :ui/a-ctx])
+                               :fx$state :fx$ikeys :fx$notifier :fx$observer])
         (dpx :FXDartWidget-observing!!! (cinfo cell))
         (dpx :FXDartWidget-observing!!! prop new-value prior-value (minfo me) (cinfo cell))
         (dpx :FXDartWidget-observing-md!!! prop (minfo me) #_#_:deref @me)
@@ -242,13 +267,24 @@
   #_ (when (tilton.mx.model.core/md-reactive? me)
     (dp :GENGEN-entry (tilton.mx.model.core/md-reactive? me) (minfo me)))
   (cond
+    ;(tilton.mx.api/mget? me :unwrapped?)
+    (some #{(name (:fx-class @me))} ["PreferredSize"])
+    (do
+      (dp :GENGEN-unwrapping (minfo me))
+      (widget-maker me ctx))
+
     (tilton.mx.model.core/md-reactive? me)
-    (do (dpx :GENGEN-reactive (minfo me))
-        (w/StatefulBuilder
+    (do #_ (dp :GENGEN-reactive!!! (minfo me)
+          (cinfo (tilton.mx.model.core/md-reactive? me)))
+        (with-flutter-ref
+          (w/StatefulBuilder
           .builder (fn [ctx set-state-cb]
-                     (dpx :stateful-builder-sees (.-hashCode ctx) (tilton.mx.api/minfo me))
+                     ;(dp :stateful-builder-sees (.-hashCode ctx) (tilton.mx.api/minfo me))
+                     ;(dp :stateful-builder-sees-ancestor-st (#/(.findAncestorStateOfType State) ^m/BuildContext ctx))
                      (tilton.fmx.factory/record-fx$state-setter me set-state-cb)
-                     (widget-maker me ctx))))
+                     ; findAncestorStateOfType<T extends State<StatefulWidget>> method
+
+                     (widget-maker me ctx)))))
     (tilton.mx.api/mget? me :with-builder-ctx)
     (w/Builder
       .builder (fn [ctx]

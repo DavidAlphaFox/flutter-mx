@@ -170,8 +170,10 @@
           (when (and c (not (some #{ky} [:fx$state])))
             ;; todo ^^^ should we handle :fx$state as a cell?!!
             ;; (dp :MDR?-sees ky (cinfo c) :me (minfo me))
-            (or (c-input? c)
-              (c-formula? c))))
+            (when (or (c-input? c)
+                    (c-formula? c))
+              ;; (dp :bingo-reactive (:state @c) (cinfo c))
+              c)))
     (md-cz me)))
 
 ;;; --- family ------------------------------------
@@ -574,7 +576,7 @@
   (dp :md-quiesce-feature (if on-off :ON :OFF))
   (reset! +md-quiesce-feature+ on-off))
 
-(def ^:dynamic *md-quiesce-log?* false)
+(def ^:dynamic *md-quiesce-log?* true)
 
 (defn md-quiesce!
   ([me] (md-quiesce! me (md-quiesce-feature?)))

@@ -85,13 +85,14 @@
   ([name existing-todos]
    (mx/make
      :mx-type (ToDoList.)
-     :name name
+     :name (str name "-list")
      :kids (cFn (mapv (fn [xtd]
                         (let [{:keys [title completed stg-id created-at]} xtd]
                           (make-ToDo me title completed stg-id created-at)))
                   existing-todos)))))
 
 (defn ToDoList-delete! [todo-list stg-id]
+  (dp :DELETING-kid-of!!!! (mx/minfo todo-list) stg-id)
   (mswap! todo-list :kids
     (partial remove (fn [td] (= stg-id (td-stg-id td))))))
 
