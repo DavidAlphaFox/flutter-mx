@@ -7,6 +7,7 @@
              :refer [Text Center Expanded Column State StatefulWidget StatelessWidget]]
             ["package:flutter/painting.dart" :as p
              :refer [TextStyle]]
+            ["package:flutter/foundation.dart" :as foundation]
             [tilton.mx.base :refer [wtrx dprn dp dpx]]
             [tilton.mx.util
              :refer [atom? rmap-set! rmap-meta-set! set-ify difference]]
@@ -145,34 +146,33 @@
 
 (def ^:dynamic *fx-building?* false)
 
-#_
-(defn mark-rebuild [^w/Element elt me cell]
-  ;; (dp :MNBuild-entry (minfo me) :elt  elt #_ (deref *fmx-debugger*))
-  (when-let [cb (deref *fmx-debugger*)]
-    (cb :mark-rebuild-unless-defunct {:element elt :cell cell}))
+#_(defn mark-rebuild [^w/Element elt me cell]
+    ;; (dp :MNBuild-entry (minfo me) :elt  elt #_ (deref *fmx-debugger*))
+    (when-let [cb (deref *fmx-debugger*)]
+      (cb :mark-rebuild-unless-defunct {:element elt :cell cell}))
 
-  (when (not (.-debugIsDefunct elt))
-    (dpx :NOT-MNBuild (minfo me) :ELEMENT elt)
-    #_(.markNeedsBuild elt)))
+    (when (not (.-debugIsDefunct elt))
+      (dpx :NOT-MNBuild (minfo me) :ELEMENT elt)
+      #_(.markNeedsBuild elt)))
 
 (defn trigger-build [me cell]
-  (when-not *fx-building?* ;; todo vestigial?
+  (when-not *fx-building?*                                  ;; todo vestigial?
     (if-let [^State? state (mget? me :fx$state)]
       (if (.-mounted state)
-        (do (dpx :TRG-build-settingimmediatestate (minfo me)  (cinfo cell))
+        (do (dpx :TRG-build-settingimmediatestate (minfo me) (cinfo cell))
             (trigger-state state me))
         (dpx :TRG-build-settingimmediatestate-UNMOUNTED!! (minfo me) (.-mounted state) (cinfo cell)))
       (if-let [state-setter (:fx$state-setter (meta me))]
         (let [ctx (:fx$ctx (meta me))]
-          (dpx :TRG-stateful-ctx!!!!!  ctx (.-debugIsDefunct ctx) (minfo me) )
+          (dpx :TRG-stateful-ctx!!!!! ctx (.-debugIsDefunct ^Element ctx) (minfo me))
           ;;(dp :TRG-ctx=state!!!!!  (.-state ctx)  )
           ;(dp :TRG-stateful-ctx!!!!!  (minfo me) ctx :state (.-state ctx) (.-mounted (.-state ctx)))
           ;(dp :TRG-build-sees-ancestor-st (#/(.findAncestorStateOfType State) ^m/Widget widget))
 
-          (if (not (.-debugIsDefunct ctx))
-            (do (dpx :TRG-build-using-state-setter!!!!!!!!!  (minfo me))
+          (if (not (.-debugIsDefunct ^m/Element ctx))
+            (do (dpx :TRG-build-using-state-setter!!!!!!!!! (minfo me))
                 (state-setter (fn [] (do))))
-            (dpx :TRG-not-using-unmounted-state-setter!!!!!!!!!  (minfo me))))
+            (dpx :TRG-not-using-unmounted-state-setter!!!!!!!!! (minfo me))))
         (do
           (dpx :TRG-state-trying-above!!! (minfo me) :cause (cinfo cell) (minfo me))
           (trigger-state-above (mpar)))))))
@@ -190,7 +190,7 @@
         (dpx :TRG-ABOVE-UNMOUNTED!! (minfo me)))
       (if-let [state-setter (:fx$state-setter (meta me))]
         (let [ctx (:fx$ctx (meta me))]
-          (dpx :TRG-ABOVE-stateful-ctx!!!!!  ctx (minfo me) )
+          (dpx :TRG-ABOVE-stateful-ctx!!!!! ctx (minfo me))
 
           ; the problem is hot reload leaves the app broken
           ; witness the lack of blinking caret
@@ -203,15 +203,15 @@
           ;(dp :TRG-stateful-ctx!!!!!  (minfo me) ctx :state (.-state ctx) (.-mounted (.-state ctx)))
           ;(dp :TRG-build-sees-ancestor-st (#/(.findAncestorStateOfType State) ^m/Widget widget))
 
-          (if (.-debugIsDefunct ctx)
+          (if (.-debugIsDefunct ^m/Element ctx)
             (do
-              (dp :TRG-not-using-unmounted-state-setter!!!!!!!!!  (minfo me))
+              (dp :TRG-not-using-unmounted-state-setter!!!!!!!!! (minfo me))
               (trigger-state-above (mpar)))
-            (do (dpx :TRG-build-using-state-setter!!!!!!!!!  (minfo me))
+            (do (dpx :TRG-build-using-state-setter!!!!!!!!! (minfo me))
                 (state-setter (fn [] (do))))))
         (do
           ;; todo expand on this message
-          (dpx :TRG-state-trying-above!!!  (minfo me))
+          (dpx :TRG-state-trying-above!!! (minfo me))
           (trigger-state-above (mpar)))))))
 
 (defn trigger-state
@@ -264,8 +264,8 @@
         (trigger-build me cell)))))
 
 (defn gen-gen [me ctx widget-maker]
-  #_ (when (tilton.mx.model.core/md-reactive? me)
-    (dp :GENGEN-entry (tilton.mx.model.core/md-reactive? me) (minfo me)))
+  #_(when (tilton.mx.model.core/md-reactive? me)
+      (dp :GENGEN-entry (tilton.mx.model.core/md-reactive? me) (minfo me)))
   (cond
     ;(tilton.mx.api/mget? me :unwrapped?)
     (some #{(name (:fx-class @me))} ["PreferredSize"])
@@ -274,16 +274,15 @@
       (widget-maker me ctx))
 
     (tilton.mx.model.core/md-reactive? me)
-    (do #_ (dp :GENGEN-reactive!!! (minfo me)
-          (cinfo (tilton.mx.model.core/md-reactive? me)))
-        (with-flutter-ref
-          (w/StatefulBuilder
+    (do #_(dp :GENGEN-reactive!!! (minfo me)
+            (cinfo (tilton.mx.model.core/md-reactive? me)))
+      (with-flutter-ref
+        (w/StatefulBuilder
           .builder (fn [ctx set-state-cb]
                      ;(dp :stateful-builder-sees (.-hashCode ctx) (tilton.mx.api/minfo me))
                      ;(dp :stateful-builder-sees-ancestor-st (#/(.findAncestorStateOfType State) ^m/BuildContext ctx))
                      (tilton.fmx.factory/record-fx$state-setter me set-state-cb)
                      ; findAncestorStateOfType<T extends State<StatefulWidget>> method
-
                      (widget-maker me ctx)))))
     (tilton.mx.api/mget? me :with-builder-ctx)
     (w/Builder
@@ -293,6 +292,8 @@
     :else (do
             (dpx :GENGEN-stateless-nobuilder (minfo me))
             (widget-maker me ctx))))
+
+;;; --- makers ------------------------------------------------
 
 (defmacro konly-prop [target-prop-name fx-class fx-props mx-props & [only-kid]]
   ;; only-kid optional for, eg, AnimatedContainer, AlertDialog
@@ -307,12 +308,14 @@
                      (fn [~'me ~'ctx]
                        (dpx :konly-prop ~target-prop-name (tilton.mx.api/minfo ~'me))
                        (~fx-class
+                         .key (or (tilton.mx.api/mget? ~'me :key)
+                                (foundation/UniqueKey))
                          ; the prop...
                          ~(symbol (str "." (name target-prop-name)))
                          (tilton.fmx.api/fx-resolve :kid1 ~'me ~'ctx
                            (first (tilton.mx.api/mkids ~'me)))
                          ; other props
-                         ~@(fx-props>mx fx-props))))))
+                         ~@(fx-props>mx (dissoc fx-props :key)))))))
        (tilton.mx.api/cFkids ~only-kid))))
 
 (defmacro konly-prop-scaffo [target-prop-name fx-class fx-props mx-props & [only-kid]]
