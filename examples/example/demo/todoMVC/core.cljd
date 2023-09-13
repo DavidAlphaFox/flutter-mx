@@ -22,7 +22,7 @@
 ;;;;;; --- the app --------------------------------------------------------
 
 (defn make-app []
-  (let [title "todox x a b"]
+  (let [title "todo"]
     (dp :todo-make-app!!!!!!!!)
     (fx/material-app
       {:title title
@@ -48,7 +48,6 @@
                              (dp :globkey newv #_(.-value newv)))]
                    (m/GlobalObjectKey me))}
         {:unwrapped? true}
-        ;; {:dummy (cI 42)}
         (fx/ink {:color m/Colors.white
                 :key (cF+ [:watch (fn [_ me newv oldv cell]
                                      (dp :globkey newv #_ (.-value newv)))]

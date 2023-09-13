@@ -10,7 +10,7 @@
     [tilton.mx.model.peek :refer [minfo]]
     [tilton.mx.base :refer [dprn dp dpx]]
     [tilton.mx.api :refer [mget mswap! mset! mset! mkids fm* fmuval fmu fasc
-                                  cF cI cFonce with-mx-isolation dp dpx] :as mx]
+                           cF cF+ cI cFonce with-mx-isolation dp dpx] :as mx]
     [tilton.fmx.api :refer [as-dart-callback my-app] :as fx]
     [example.demo.todoMVC.common :as cmm
      :refer [my-todo-list]]
@@ -22,12 +22,12 @@
      :shape     (fx/rounded-rectangle-border
                   {:borderRadius (m/BorderRadius.all (m.Radius/circular 20.0))})
      :onChanged (cF (as-dart-callback [value]
-                      (mset! todo :completed value)))}))
+                                      (mset! todo :completed value)))}))
 
 (defn todo-delete-callback [todo tag]
   (as-dart-callback [& [direction]]
-    (todo/ToDoList-delete! (my-todo-list)
-      (todo/td-stg-id todo))))
+                    (todo/ToDoList-delete! (my-todo-list)
+                                           (todo/td-stg-id todo))))
 
 (defn- delete-button [todo]
   (fx/visibility
@@ -42,7 +42,7 @@
                          .color (cmm/title-red)
                          .fontWeight m/FontWeight.w200
                          .fontSize 20.0)}
-        "X"))))
+               "X"))))
 
 (defn to-do-display [todo]
   (fx/list-tile
@@ -54,9 +54,9 @@
                                      .color m/Colors.grey
                                      .decoration p.TextDecoration/lineThrough)
                                    (p/TextStyle .color
-                                     (if (mget todo :ae-events?)
-                                       m/Colors.red
-                                       m/Colors.blue))))}
+                                                (if (mget todo :ae-events?)
+                                                  m/Colors.red
+                                                  m/Colors.blue))))}
                      {:name :todo-li-title-text}
                      (td-title todo)))}
     {:name :todo-dsp
@@ -72,7 +72,7 @@
          trimmed (str/trim value)]
      (cond
        (str/blank? trimmed) (mswap! (my-todo-list) :kids
-                              (partial remove (fn [td] (= stg-id (td-stg-id td)))))
+                                    (partial remove (fn [td] (= stg-id (td-stg-id td)))))
        :else (do
                (mset! todo :title trimmed)                  ;; two dataflow triggers
                (mset! (fasc :item-control) :editing? false))))))
@@ -88,10 +88,10 @@
                     ;; the to-do input field is already focused, and autofocus does not jump to those
                     ;; unless in a fresh scope. So ^^^ we throw in a fresh scope.
                     {:onFocusChange (cF (as-dart-callback [focused?]
-                                          (when #_(mget (fmu :item-control) :editing?) (not focused?)
-                                            ;; spec says commit on blur...
-                                            (commit-to-do-editing (fm* :todo-editor) todo)
-                                            (mset! (fasc :item-control) :editing? false))))}
+                                                          (when #_(mget (fmu :item-control) :editing?) (not focused?)
+                                                            ;; spec says commit on blur...
+                                                            (commit-to-do-editing (fm* :todo-editor) todo)
+                                                            (mset! (fasc :item-control) :editing? false))))}
                     {:host tile}
                     ;; ^^^ this widget is a delegate, not a child, so we record the ListTile as the "host",
                     ;; and modified navigation to try any host if "parent" is nil while searching up the Matrix.
@@ -100,30 +100,30 @@
                       (fx/material {:elevation   3.0
                                     :color       m/Colors.white
                                     :shadowColor m/Colors.black}
-                        ;; doing our best ^^^^ to emulate official TodoMVC styling.
-                        (fx/text-field {:autofocus   true
-                                        :focusNode   (cF (m/FocusNode
-                                                           .onKeyEvent (fn [node ^m/KeyEvent event]
-                                                                         ;; spec says to abandon edit if Escape key pressed
-                                                                         (cty/with-mx-isolation
-                                                                           (cond
-                                                                             (and (dart/is? event srvc/KeyDownEvent)
-                                                                               (= "Escape" (.-keyLabel (.-logicalKey event))))
-                                                                             (do
-                                                                               (mset! (fasc :item-control) :editing? false)
-                                                                               m/KeyEventResult.handled)
-                                                                             :else m/KeyEventResult.ignored)))))
-                                        :decoration  (m/InputDecoration
-                                                       .border (m/OutlineInputBorder
-                                                                 .borderRadius (m/BorderRadius.all
-                                                                                 (m.Radius/circular 0.0)))
-                                                       .contentPadding (m/EdgeInsets.all 9.0))
-                                        :onSubmitted (cF (as-dart-callback [value]
-                                                           (commit-to-do-editing me todo value)))
-                                        :controller  (cFonce (m/TextEditingController
-                                                               .text (mget me :value)))}
-                          {:name  :todo-editor
-                           :value (cI title)}))))))}
+                                   ;; doing our best ^^^^ to emulate official TodoMVC styling.
+                                   (fx/text-field {:autofocus   true
+                                                   :focusNode   (cF (m/FocusNode
+                                                                      .onKeyEvent (fn [node ^m/KeyEvent event]
+                                                                                    ;; spec says to abandon edit if Escape key pressed
+                                                                                    (cty/with-mx-isolation
+                                                                                      (cond
+                                                                                        (and (dart/is? event srvc/KeyDownEvent)
+                                                                                             (= "Escape" (.-keyLabel (.-logicalKey event))))
+                                                                                        (do
+                                                                                          (mset! (fasc :item-control) :editing? false)
+                                                                                          m/KeyEventResult.handled)
+                                                                                        :else m/KeyEventResult.ignored)))))
+                                                   :decoration  (m/InputDecoration
+                                                                  .border (m/OutlineInputBorder
+                                                                            .borderRadius (m/BorderRadius.all
+                                                                                            (m.Radius/circular 0.0)))
+                                                                  .contentPadding (m/EdgeInsets.all 9.0))
+                                                   :onSubmitted (cF (as-dart-callback [value]
+                                                                                      (commit-to-do-editing me todo value)))
+                                                   :controller  (cFonce (m/TextEditingController
+                                                                          .text (mget me :value)))}
+                                                  {:name  :todo-editor
+                                                   :value (cI title)}))))))}
     {:name :todo-edt
      :todo todo
      :host me}))
@@ -133,7 +133,7 @@
     {:key         (m/ValueKey. (td-stg-id todo))
      :direction   w/DismissDirection.horizontal
      :onDismissed (todo-delete-callback todo :swipe-dismissed)}
-    {:name :todo-LI
+    {:name       :todo-LI
      :fx$quiesce :never}
     (fx/visibility
       ;; try with SizedBox.shrink?
@@ -147,21 +147,21 @@
                         :done (td-completed todo)))}
       (fx/container
         {:decoration (fx/in-my-context [me context]
-                       ;; list with separator cannot hide separator when item hidden, so
-                       ;; we fake a separator with a top border on the container
-                       (m/BoxDecoration .border
-                         (m/Border .top (m/BorderSide .width 0.5
-                                          .color (.-dividerColor (.of m/Theme context))))))}
+                                       ;; list with separator cannot hide separator when item hidden, so
+                                       ;; we fake a separator with a top border on the container
+                                       (m/BoxDecoration .border
+                                                        (m/Border .top (m/BorderSide .width 0.5
+                                                                                     .color (.-dividerColor (.of m/Theme context))))))}
         (fx/gesture-detector
           {:onDoubleTap (as-dart-callback []
-                          (when (not (mget me :editing?))
-                            (mset! me :editing? true)))}
+                                          (when (not (mget me :editing?))
+                                            (mset! me :editing? true)))}
           {:name     :item-control
            :hovered? (cI false)
            :editing? (cI false)}
           (letfn [(hover-cb [hovered?]
                     (as-dart-callback [e]
-                      (mset! (fasc :item-control) :hovered? hovered?)))]
+                                      (mset! (fasc :item-control) :hovered? hovered?)))]
             (fx/mouse-region
               {:onEnter (hover-cb true)
                :onHover (hover-cb true)
@@ -174,7 +174,10 @@
 (defn todo-items []
   (fx/expanded
     ;; ^^^ sizer is required to join column, which demands children know their size
-    {}{:unwrapped? true}
+    {:key (cF+ [:watch (fn [_ me newv oldv cell]
+                         (dp :globkey newv #_(.-value newv)))]
+               (m/GlobalObjectKey me))}
+    {:unwrapped? true}
     (fx/list-view+builder
       {:padding     (m/EdgeInsets.all 0.0)
        :itemCount   (cF (count (mkids me)))
@@ -182,15 +185,15 @@
                           (fn [ctx i]
                             ;; we must yield a native Flutter widget ready for Flutter, so we must "render" here,
                             (fx/fx-render ctx
-                              (nth (mkids me) i)))))}
+                                          (nth (mkids me) i)))))}
       {:name :lv-builder :hack (cI 423)}
       (map (fn [todo]
              (let [stg-id (td-stg-id todo)
                    exg (some (fn [li]
                                (when (= stg-id (.-value ^m/ValueKey (mget li :key)))
                                  li))
-                         (when (not= mx/unbound _cache) _cache))
+                             (when (not= mx/unbound _cache) _cache))
                    ]
                (or exg (todo-list-item todo))))
-        (sort-by todo/td-created-at
-          (todo/app-todos (my-app)))))))
+           (sort-by todo/td-created-at
+                    (todo/app-todos (my-app)))))))

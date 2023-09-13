@@ -275,23 +275,25 @@
       (widget-maker me ctx))
 
     (tilton.mx.model.core/md-reactive? me)
-    (do #_(dp :GENGEN-reactive!!! (minfo me)
-              (cinfo (tilton.mx.model.core/md-reactive? me)))
-      (with-flutter-ref
-        (w/StatefulBuilder
-          .builder (fn [ctx set-state-cb]
-                     ;(dp :stateful-builder-sees (.-hashCode ctx) (tilton.mx.api/minfo me))
-                     ;(dp :stateful-builder-sees-ancestor-st (#/(.findAncestorStateOfType State) ^m/BuildContext ctx))
-                     (tilton.fmx.factory/record-fx$state-setter me set-state-cb)
-                     ; findAncestorStateOfType<T extends State<StatefulWidget>> method
-                     (widget-maker me ctx)))))
+    (do (dp :GENGEN-wrap-StatefulBuilder (minfo me)
+            (cinfo (tilton.mx.model.core/md-reactive? me)))
+        (with-flutter-ref
+          (w/StatefulBuilder
+            .builder (fn [ctx set-state-cb]
+                       ;(dp :stateful-builder-sees (.-hashCode ctx) (tilton.mx.api/minfo me))
+                       ;(dp :stateful-builder-sees-ancestor-st (#/(.findAncestorStateOfType State) ^m/BuildContext ctx))
+                       (tilton.fmx.factory/record-fx$state-setter me set-state-cb)
+                       ; findAncestorStateOfType<T extends State<StatefulWidget>> method
+                       (widget-maker me ctx)))))
     (tilton.mx.api/mget? me :with-builder-ctx)
-    (w/Builder
-      .builder (fn [ctx]
-                 (dpx :GENGEN-reactive (minfo me))
-                 (widget-maker me ctx)))
+    (do (dp :GENGEN-builder-by-request (minfo me))
+        (with-flutter-ref
+          (w/Builder
+            .builder (fn [ctx]
+                       (dpx :GENGEN-reactive (minfo me))
+                       (widget-maker me ctx)))))
     :else (do
-            (dpx :GENGEN-stateless-nobuilder (minfo me))
+            (dp :GENGEN-nobuilder (minfo me))
             (widget-maker me ctx))))
 
 ;;; --- makers ------------------------------------------------
