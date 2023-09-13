@@ -15,7 +15,7 @@
     (scaffold
       {:appBar
        (app-bar
-         {:title (m/Text "Flutter/MX Counter")})
+         {:title (m/Text "Flutter/MX Counter 2")})
        :floatingActionButton
        (cF (floating-action-button
              {:onPressed (as-dart-callback []
