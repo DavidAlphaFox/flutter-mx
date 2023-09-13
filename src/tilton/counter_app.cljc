@@ -1,7 +1,7 @@
 (ns tilton.counter-app
   (:require
     ["package:flutter/material.dart" :as m]
-    [tilton.mx.api :refer [dp cI cF mget mswap! fm* fasc] :as mx]
+    [tilton.mx.api :refer [dp cI cF cF+ mget mswap! fm* fasc] :as mx]
     [tilton.fmx.api :as fx
      :refer [as-dart-callback in-my-context
              material-app scaffold app-bar floating-action-button
@@ -16,17 +16,29 @@
 
 (defn make-app []
   (fx/material-app
-    {:title "Flutter/MX Counter Demo"
+    {:key (cF+ [:watch (fn [_ me newv oldv cell]
+                         (dp :globkey newv #_ (.-value newv)))]
+               (m/GlobalObjectKey me))
+     :title "Flutter/MX Counter Demo"
      :theme (m/ThemeData
               .colorScheme (m/ColorScheme.fromSeed
                              .seedColor m/Colors.deepPurple)
               .useMaterial3 true)}
     (scaffold
-      {:appBar               (app-bar {:title (m/Text "Flutter/MX Counter Classico")
+      {:appBar
+       (app-bar {:title (m/Text "Flutter/MX Counter Classic")
+                 :backgroundColor #_m/Colors.purple
+                 ;; todo get this working (s/b light purple:
+                 (cF (fx/in-my-context [me ctx]
+                                       (.-inversePrimary (.-colorScheme (m/Theme.of ctx)))))}
+                {:unwrapped? true})
+       #_ (fx/preferred-size
+                               {:preferredSize (.fromHeight m/Size 72)}
+                               (app-bar {:title (m/Text "Flutter/MX Counter Classico")
                                        :backgroundColor #_m/Colors.purple
                                        ;; todo get this working (s/b light purple:
                                        (cF (fx/in-my-context [me ctx]
-                                             (.-inversePrimary (.-colorScheme (m/Theme.of ctx)))))})
+                                             (.-inversePrimary (.-colorScheme (m/Theme.of ctx)))))}))
        :floatingActionButton (floating-action-button
                                {:onPressed (as-dart-callback []
                                              (mswap! (fm* :the-counter) :counter inc))

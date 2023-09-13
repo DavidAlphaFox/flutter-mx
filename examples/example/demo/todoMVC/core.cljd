@@ -22,33 +22,47 @@
 ;;;;;; --- the app --------------------------------------------------------
 
 (defn make-app []
-  (let [title "todo"]
+  (let [title "todox x a b"]
+    (dp :todo-make-app!!!!!!!!)
     (fx/material-app
       {:title title
        :theme app-theme}
-      {:name      :app
+      {:key       (cF+ [:watch (fn [_ me newv oldv cell]
+                                 (dp :globkey newv #_(.-value newv)))]
+                       (m/GlobalObjectKey me))
+       :name      :app
        :db        (cF+ [:async? true
                         :watch (fn [_ me hv-box _ _]
                                  (stg/DB! hv-box))]
-                    (-> hv/Hive hv/HiveX .initFlutter await)
-                    (-> hv/Hive (.openBox "todo")))
+                       (-> hv/Hive hv/HiveX .initFlutter await)
+                       (-> hv/Hive (.openBox "todo")))
        :todo-list (cF (when-let [db (mget me :db)]
                         (assert (stg/DB) (str "DB not populated but cell :db is: " db))
                         ;; Now we can load any existing todos from storage...
                         (todo/make-ToDoList "todo"
-                          (stg/collection-docs "todo"))))}
+                                            (stg/collection-docs "todo"))))}
       (fx/scaffold
-        {:appBar      #_(m/PreferredSize
-                          .preferredSize (.fromHeight m/Size 72)
-                          .child (m/AppBar :title (m/Text "PLAIN 3")))
-         (todo-app-bar title)
-         :persistentFooterButtons [(todos-dashboard)]}
+        {:appBar                  (todo-app-bar title)
+         :persistentFooterButtons [(todos-dashboard)]
+        :key (cF+ [:watch (fn [_ me newv oldv cell]
+                             (dp :globkey newv #_(.-value newv)))]
+                   (m/GlobalObjectKey me))}
+        {:unwrapped? true}
         ;; {:dummy (cI 42)}
-        (fx/ink {:color m/Colors.white}
-            (fx/column
-              (input/todo-controls)
-              (items/todo-items)
-              (about-credits)))))))
+        (fx/ink {:color m/Colors.white
+                :key (cF+ [:watch (fn [_ me newv oldv cell]
+                                     (dp :globkey newv #_ (.-value newv)))]
+                           (m/GlobalObjectKey me))
+                 }
+                {:unwrapped? true}
+                (fx/column {:key (cF+ [:watch (fn [_ me newv oldv cell]
+                                                  (dp :globkey newv #_ (.-value newv)))]
+                                        (m/GlobalObjectKey me))
+                              }
+                           {:unwrapped? true}
+                  (input/todo-controls)
+                  (items/todo-items)
+                  (about-credits)))))))
 
 ;;; --- the app bar -----------------------------------------------
 (defn todo-app-bar [title]
@@ -62,7 +76,7 @@
                                                 .fontFamily "Helvetica Neue"
                                                 .color (cmm/title-red)
                                                 .fontWeight m/FontWeight.w100
-                                                .fontSize 40.0 #_ 64.0)}
+                                                .fontSize 40.0 #_64.0)}
                                       title))})))
 
 ;;; --- footer filters -------------------------------------------------
@@ -94,9 +108,9 @@
             (mapv #(fx/text {:style faint} %) credits)))
         (fx/icon-button
           {:onPressed (as-dart-callback []
-                        (mswap! (fasc :credits-toggle) :show-credits? not))
+                                        (mswap! (fasc :credits-toggle) :show-credits? not))
            :icon      (cF (in-my-context [me ctx]
-                            (m/Icon (if (mget (fasc :credits-toggle) :show-credits?)
-                                      m.Icons/info_outline m.Icons/info)
-                              .color m/Colors.grey)))})))))
+                                         (m/Icon (if (mget (fasc :credits-toggle) :show-credits?)
+                                                   m.Icons/info_outline m.Icons/info)
+                                                 .color m/Colors.grey)))})))))
 

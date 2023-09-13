@@ -16,6 +16,8 @@
 
 (defn main []
   (dp :main-entry!!)
+  (prn :main-entry!!)
+  (println :main-entry!!)
   (md/md-quiesce-feature! true)
   (.ensureInitialized w/WidgetsFlutterBinding)
   ;; (fxk/fmx-debugger-set! sample-debugger)

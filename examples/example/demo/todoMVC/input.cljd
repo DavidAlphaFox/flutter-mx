@@ -5,7 +5,7 @@
     ["package:flutter/painting.dart" :as p]
     [clojure.string :as str]
     [tilton.mx.base :refer [dprn dp dpx]]
-    [tilton.mx.api :refer [cF cI cFonce mget  mswap! mset!]]
+    [tilton.mx.api :refer [cF cI cF+ cFonce mget  mswap! mset!]]
     [tilton.fmx.api :refer [as-dart-callback my-app] :as fx]
     [example.demo.todoMVC.common :refer [ my-todo-list ] :as cmm]
     [example.demo.todoMVC.todo :refer [td-completed] :as todo]))
@@ -28,7 +28,11 @@
 (defn todo-input []
   (fx/material {:elevation   20.0
                 :color       m/Colors.white
-                :shadowColor m/Colors.black}
+                :shadowColor m/Colors.black
+               :key (cF+ [:watch (fn [_ me newv oldv cell]
+                                    (dp :globkey newv #_ (.-value newv)))]
+                          (dp :building-row-key)
+                          (m/GlobalObjectKey me))}
     (fx/text-field {:autofocus   true
                     :focusNode   (m/FocusNode)
                     :decoration  (m/InputDecoration
@@ -36,7 +40,11 @@
                                    .border m.InputBorder/none
                                    .contentPadding (m/EdgeInsets.all 9.0))
                     :onSubmitted (todo-input-onSubmitted-formula)
-                    :controller  (cFonce (fx/standard-text-value-controller me))}
+                    :controller  (cFonce (fx/standard-text-value-controller me))
+                    :key (cF+ [:watch (fn [_ me newv oldv cell]
+                                        (dp :globkey newv #_ (.-value newv)))]
+                              (dp :building-row-key)
+                              (m/GlobalObjectKey me))}
       {:name  :todo-input
        :value (cI "")})))
 
@@ -61,12 +69,19 @@
        :icon      (m/Icon m.Icons/expand_more .color m/Colors.blueGrey)})))
 
 (defn todo-controls []
-  (fx/row
+  (dp :todo-controls-entry)
+  (fx/row {:key (cF+ [:watch (fn [_ me newv oldv cell]
+                                 (dp :globkey newv #_ (.-value newv)))]
+                       (dp :building-row-key)
+                       (m/GlobalObjectKey me))
+             }
     (fx/expanded {:flex 1}
       ;; handy widget to mark all to-dos at once
       (todo-toggle-all))
     ; --- the to-do input field ----
     (fx/expanded {:flex 9}
+                 {:unwrapped? true}
       (fx/padding
         {:padding (m/EdgeInsets.all 16.0)}
+        {:unwrapped? true}
         (todo-input)))))
