@@ -34,6 +34,7 @@
     {:visible (cF (or
                     (fx/is-mobile?)
                     (mget (fmu :item-control) :hovered?)))}
+    {:name :del-button}
     (fx/text-button
       ;; our "delete" icon on each to-do
       {:onPressed (todo-delete-callback todo :item-del-button)}
@@ -141,7 +142,8 @@
        :maintainSize      false
        :maintainAnimation true
        :maintainState     true}
-      {:selected? (cF (case (fmuval :completions :selection)
+      {:name :todo-vis
+       :selected? (cF (case (fmuval :completions :selection)
                         :all true
                         :active (not (td-completed todo))
                         :done (td-completed todo)))}
@@ -174,10 +176,8 @@
 (defn todo-items []
   (fx/expanded
     ;; ^^^ sizer is required to join column, which demands children know their size
-    {:key (cF+ [:watch (fn [_ me newv oldv cell]
-                         (dp :globkey newv #_(.-value newv)))]
-               (m/GlobalObjectKey me))}
-    {:unwrapped? true}
+    {}
+    {:unwrapped? true} ; needed
     (fx/list-view+builder
       {:padding     (m/EdgeInsets.all 0.0)
        :itemCount   (cF (count (mkids me)))

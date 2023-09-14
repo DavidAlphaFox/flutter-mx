@@ -16,9 +16,8 @@
 
 (defn make-app []
   (fx/material-app
-    {:key (cF+ [:watch (fn [_ me newv oldv cell]
-                         (dp :globkey newv #_ (.-value newv)))]
-               (m/GlobalObjectKey me))
+    {:key   (fx/in-my-context [me ctx]
+              (fx/widget-key me ctx :matapp))
      :title "Flutter/MX Counter Demo"
      :theme (m/ThemeData
               .colorScheme (m/ColorScheme.fromSeed

@@ -5,6 +5,7 @@
     ["package:flutter/widgets.dart" :as w]
     ["package:flutter/foundation.dart" :as f]
     [tilton.mx.cell.base :refer [cinfo c-model] :as cty]
+
     [tilton.mx.model.core :as md]
     [tilton.mx.base
      :refer [wtrx dp dpx trx]]
@@ -18,7 +19,9 @@
   (dp :main-entry!!)
   (prn :main-entry!!)
   (println :main-entry!!)
+  (cty/cells-reset)
   (md/md-quiesce-feature! true)
+  (fx/widget-key-clear)
   (.ensureInitialized w/WidgetsFlutterBinding)
   ;; (fxk/fmx-debugger-set! sample-debugger)
 

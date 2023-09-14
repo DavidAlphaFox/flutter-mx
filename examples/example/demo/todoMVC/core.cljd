@@ -23,14 +23,10 @@
 
 (defn make-app []
   (let [title "todo"]
-    (dp :todo-make-app!!!!!!!!)
     (fx/material-app
       {:title title
        :theme app-theme}
-      {:key       (cF+ [:watch (fn [_ me newv oldv cell]
-                                 (dp :globkey newv #_(.-value newv)))]
-                       (m/GlobalObjectKey me))
-       :name      :app
+      {:name      :app
        :db        (cF+ [:async? true
                         :watch (fn [_ me hv-box _ _]
                                  (stg/DB! hv-box))]
@@ -43,22 +39,12 @@
                                             (stg/collection-docs "todo"))))}
       (fx/scaffold
         {:appBar                  (todo-app-bar title)
-         :persistentFooterButtons [(todos-dashboard)]
-        :key (cF+ [:watch (fn [_ me newv oldv cell]
-                             (dp :globkey newv #_(.-value newv)))]
-                   (m/GlobalObjectKey me))}
-        {:unwrapped? true}
-        (fx/ink {:color m/Colors.white
-                :key (cF+ [:watch (fn [_ me newv oldv cell]
-                                     (dp :globkey newv #_ (.-value newv)))]
-                           (m/GlobalObjectKey me))
-                 }
-                {:unwrapped? true}
-                (fx/column {:key (cF+ [:watch (fn [_ me newv oldv cell]
-                                                  (dp :globkey newv #_ (.-value newv)))]
-                                        (m/GlobalObjectKey me))
-                              }
-                           {:unwrapped? true}
+         :persistentFooterButtons [(todos-dashboard)]}
+        {:unwrapped? true} ;; needed
+        (fx/ink {:color m/Colors.white}
+                {:unwrapped? true} ;; neeeded
+                (fx/column {}
+                  {:unwrapped? true} ; needed
                   (input/todo-controls)
                   (items/todo-items)
                   (about-credits)))))))
