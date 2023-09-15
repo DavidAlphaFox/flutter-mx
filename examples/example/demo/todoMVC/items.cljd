@@ -144,10 +144,12 @@
        :maintainAnimation true
        :maintainState     true}
       {:name      :todo-vis
-       :selected? (cF (case (fmuval :completions :selection)
-                        :all true
-                        :active (not (td-completed todo))
-                        :done (td-completed todo)))}
+       :selected? (cF (let [completion (fmuval :completions :selection)]
+                        (case completion
+                          :all true
+                          :active (not (td-completed todo))
+                          :done (td-completed todo)
+                          (dp :unexpected-completion!!!! completion))))}
       (fx/container
         {:decoration (fx/in-my-context [me context]
                        ;; list with separator cannot hide separator when item hidden, so

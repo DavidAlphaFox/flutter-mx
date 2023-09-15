@@ -22,7 +22,7 @@
 ;;;;;; --- the app --------------------------------------------------------
 
 (defn make-app []
-  (let [title "todo x"]
+  (let [title "todo x y"]
     (fx/material-app
       {:title title
        :theme app-theme}

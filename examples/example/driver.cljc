@@ -38,5 +38,5 @@
 
 (defn select []
   ;; NG: tek/x26, tts
-  (x05/make-app))
+  (todo/make-app))
 

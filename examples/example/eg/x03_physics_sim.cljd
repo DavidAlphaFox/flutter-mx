@@ -45,8 +45,10 @@
                             (fn [^m/DragEndDetails details]
                               (logo-recoil me ctx (-> details .-velocity .-pixelsPerSecond))))))}
       {:name          :draggo
+       :ticker-mixin  true
        :initState     (fn [state me]
                         ;; todo dispose this controller
+                        (dp :inistate!!!!!!!!!!!!!! (minfo me))
                         (mx/rmap-set! [:controller me]
                           (m/AnimationController .vsync state)))
        :dragAlignment (cI m/Alignment.center)

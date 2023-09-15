@@ -2,7 +2,7 @@
   (:require
     ["package:flutter/material.dart" :as m]
     ["package:flutter/painting.dart" :as p]
-    [tilton.mx.api :refer [cF cI cFn cFonce mpar mget mset! mswap! fm* fmu fasc] :as mx]
+    [tilton.mx.api :refer [dp minfo cF cI cFn cFonce mpar mget mset! mswap! fm* fmu fasc] :as mx]
     [tilton.fmx.api :as fx
      :refer [as-dart-callback in-my-context
              material-app scaffold app-bar floating-action-button
@@ -19,7 +19,9 @@
        :floatingActionButton
        (floating-action-button
          {:onPressed (as-dart-callback []
-                       (mswap! (fm* :scaffo) :counter inc))
+                       (dp :fab-adc-me (minfo me))
+                       (mx/navdbg :all
+                         (mswap! (fm* :scaffo) :counter inc)))
           :tooltip   "Increment"}
          (m/Icon m/Icons.add .color m/Colors.black))}
       {:name :scaffo

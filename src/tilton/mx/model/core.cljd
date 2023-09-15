@@ -230,10 +230,10 @@
 ;;; -------------------------------------------------------------------------
 ;;;      Navigation
 ;;;
-(def ^:dynamic *fn-navig-trace* nil)
+(def ^:dynamic *navig-trace* nil)
 
 (defn fm-tracing? [key]
-  (some #{key :all} *fn-navig-trace*))
+  (some #{key :all} *navig-trace*))
 
 (defn fmdp [key & mas]
   (when (fm-tracing? key)
@@ -241,7 +241,7 @@
 
 (defmacro navdbg [option & body]
   `(let [options# ~option]
-     (binding [*fn-navig-trace* (if (sequential? options#)
+     (binding [*navig-trace* (if (sequential? options#)
                                   options# (vector options#))]
        (do ~@body))))
 
@@ -254,8 +254,9 @@
     (do (dp :fm-navig-eq?-bail-not-ref poss)
         false)
 
-    (fn? seek) (do                                          ;; (dp :trying-fn)
-                 (seek poss))
+    (fn? seek) (when-let [found (seek poss)]
+                 (fmdp :bingo found)
+                 found)
     (keyword? seek) (do
                       ;; (trx :fm-navig-eq?sees seek (:name @poss) (mx-type poss))
                       (or (= seek (:name @poss))
@@ -318,18 +319,19 @@
       :else (when it (dp :ignoring-prop-val it)))))
 
 (defn fm-navig [what where & options]
-  (do                                                       ;; wtrx (0 100 :fm-navig-entry *trdeep* options (if (mref? where) (minfo where)))
+  ;; todo change so *navig-trace* unbound disables this
+  (wtrx (0 100 :fm-navig-entry *trdeep* options (if (mref? where) (minfo where)))
     (fmdp :all :navig-options options)
     (cond
-      (> *trdeep* 16)
-      (do (dprn :NAVIG-BAILING-at-depth *trdeep*)
+      (> *trdeep* 32)
+      (do (dp :NAVIG-BAILING-at-depth *trdeep*)
           (when (:must? options)
             (mx-throw (str/join "-" [:fm-navig-must-failed what where options]))))
 
       (and where what (atom? where))
       (let [options (merge {:me? false, :inside? false, :up? true, :wocd? true ;; without-c-dependency
                             } (apply hash-map options))]
-        ;;(dp :fm-navig-opts options)
+        ;;(dp :fm-NET-navig-opts (assoc options :skip (minfo (:skip options))))
         (binding [*depender* (if (:wocd? options) nil *depender*)]
           (when (mref? where)
             (or (when (:me? options)
@@ -340,9 +342,11 @@
                           ;; todo should navig be restricted to custom props and :kids?
                           ;; todo rework how delegates access full mx
                           (keep #{:persistentFooterButtons
-                                  :floatingActionButton} (:fx$ikeys @where)))))
+                                  :floatingActionButton
+                                  :home :body} (:fx$ikeys @where)))))
 
                 (and (:inside? options)
+                  ;; todo try properties other than :kids
                      (if-let [kids (mget? where :kids)]
                        (do
                          (if-let [netkids (remove #{(:skip options)} kids)]
@@ -352,7 +356,7 @@
                                               :inside? true
                                               :up? false) netkids))
                            (trx nil :no-net-kids)))
-                       (trx nil :inside-no-kids (:name @where))))
+                       (dp :inside-no-kids (minfo where))))
 
                 (and (:up? options)
                      (if-let [par (:parent @where)]
@@ -376,7 +380,7 @@
 
                 (when (:must? options)
                   (mx-throw (str/join "-" [:fm-navig-must-failed what where options])))))))
-      :else (do (dpx :NAVIG-falls-out nil)
+      :else (do (dp :NAVIG-falls-out nil)
                 (when (:must? options)
                   (mx-throw "fall out navig")
                   (mx-throw (str/join "-" [:fm-navig-must-failed what where options])))

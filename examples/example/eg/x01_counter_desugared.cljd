@@ -43,7 +43,9 @@
                                                    (str (mget (fm* :scaffo) :counter))))))
                    :floatingActionButton (floating-action-button
                                            {:onPressed (as-dart-callback []
-                                                         (mswap! (fm* :scaffo) :counter inc))
+                                                         (dp :fab-adc-me (minfo me))
+                                                         (mx/navdbg :all
+                                                           (mswap! (fm* :scaffo) :counter inc)))
                                             :tooltip   "Increment"}
                                            (m/Icon m/Icons.add))}
                   {:name    :scaffo
