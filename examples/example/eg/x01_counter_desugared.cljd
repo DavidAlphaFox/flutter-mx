@@ -41,11 +41,10 @@
                                                    {:style (in-my-context [me ctx]
                                                              (.-headlineMedium (.-textTheme (m/Theme.of ctx))))}
                                                    (str (mget (fm* :scaffo) :counter))))))
-                   :floatingActionButton (cF (floating-action-button
-                                               ;; todo get this working without cF
-                                               {:onPressed (as-dart-callback []
-                                                             (mswap! (fm* :scaffo) :counter inc))
-                                                :tooltip   "Increment"}
-                                               (m/Icon m/Icons.add)))}
+                   :floatingActionButton (floating-action-button
+                                           {:onPressed (as-dart-callback []
+                                                         (mswap! (fm* :scaffo) :counter inc))
+                                            :tooltip   "Increment"}
+                                           (m/Icon m/Icons.add))}
                   {:name    :scaffo
                    :counter (cI 0)}))}))

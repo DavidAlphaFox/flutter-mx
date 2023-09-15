@@ -65,7 +65,6 @@
        :icon      (m/Icon m.Icons/expand_more .color m/Colors.blueGrey)})))
 
 (defn todo-controls []
-  (dp :todo-controls-entry)
   (fx/row
     (fx/expanded {:flex 1}
                  ;; handy widget to mark all to-dos at once

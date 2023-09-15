@@ -22,7 +22,7 @@
 ;;;;;; --- the app --------------------------------------------------------
 
 (defn make-app []
-  (let [title "todo"]
+  (let [title "todo x"]
     (fx/material-app
       {:title title
        :theme app-theme}
@@ -75,7 +75,7 @@
 ;;; --- credits --------------------------------------------------------
 (defn about-credits []
   (let [faint (p/TextStyle
-                ;; todo does flutter let us place the style higher so referenced just once?
+                ;; todo explore Themes
                 .color m/Colors.grey
                 .fontSize 14.0)
         credits ["Double-click a todo to edit."

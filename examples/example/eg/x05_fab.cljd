@@ -31,6 +31,7 @@
   (fx/sized-box+expand
     {}                                                      ;; <= necessary placeholder
     {:name             :fab
+     :ticker-mixin true
      ; --- Dart lifecycle ---------------------------
      :initState     (fn [state me]
                       ;; todo dispose this controller
