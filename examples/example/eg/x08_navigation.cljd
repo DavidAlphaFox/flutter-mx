@@ -10,7 +10,7 @@
     (fx/center
       (fx/elevated-button
         {:onPressed (fx/in-my-context [me ctx]
-                      (fx/->CBAsIs
+                      (fx/cb-as-is
                         (fn ^void []
                           (fx/ctx-page-pop ctx)
                           nil)))}
@@ -32,7 +32,7 @@
         (fx/builder-ctx ;; makes Navigator visible to .of
           (fx/elevated-button
             {:onPressed (fx/in-my-context [me ctx]
-                          (fx/->CBAsIs
+                          (fx/cb-as-is
                             #(my-ctx-page-push ctx (second-route))))}
             ;;{:with-builder-ctx true} ;; alternate way of wrapping with fresh ctx
             (fx/text "Open route")))))))

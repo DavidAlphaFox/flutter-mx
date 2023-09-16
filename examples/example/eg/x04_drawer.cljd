@@ -24,14 +24,14 @@
                        (fx/list-tile
                          {:title (m/Text "Item 1")
                           :onTap (fx/in-my-context [me ctx]
-                                   (fx/->CBAsIs
+                                   (fx/cb-as-is
                                      #(.pop (m/Navigator.of ctx))))}
                          {:with-builder-ctx true})
                        (fx/builder-ctx
                          (fx/list-tile
                            {:title (m/Text "Item 2")
                             :onTap (fx/in-my-context [me ctx]
-                                     (fx/->CBAsIs
+                                     (fx/cb-as-is
                                        #(.pop (m/Navigator.of ctx))))})))))}
       (fx/center
         (fx/text "My Ported Page!!")))))

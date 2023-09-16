@@ -24,14 +24,14 @@
   (fx/ticker-mode
     {:enabled true}
     (fx/gesture-detector
-      {:onPanDown   (cF (fx/->CBAsIs
+      {:onPanDown   (cF (fx/cb-as-is
                           (fn [^m/DragDownDetails details]
                             (let [c (fx/my-controller :panDown)]
                               (assert c (str "Draggable-card pandown no controler in "
                                           (minfo me)))
                               (.stop c)))))
        :onPanUpdate (fx/in-my-context [me ctx]
-                      (fx/->CBAsIs
+                      (fx/cb-as-is
                         (fn [^m/DragUpdateDetails details]
                           (let [size (.-size (MediaQuery/of ctx))]
                             (with-mx-isolation
@@ -41,14 +41,13 @@
                                      (/ (-> details .-delta .-dx) (/ (.-width size) 2))
                                      (/ (-> details .-delta .-dy) (/ (.-height size) 2))))))))))
        :onPanEnd    (cF (fx/in-my-context [me ctx]
-                          (fx/->CBAsIs
+                          (fx/cb-as-is
                             (fn [^m/DragEndDetails details]
                               (logo-recoil me ctx (-> details .-velocity .-pixelsPerSecond))))))}
       {:name          :draggo
        :ticker-mixin  true
        :initState     (fn [state me]
                         ;; todo dispose this controller
-                        (dp :inistate!!!!!!!!!!!!!! (minfo me))
                         (mx/rmap-set! [:controller me]
                           (m/AnimationController .vsync state)))
        :dragAlignment (cI m/Alignment.center)

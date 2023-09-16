@@ -34,9 +34,13 @@
     [example.eg.x040-named-routes :as x040]
     [example.eg.x029a-layout-kid-builder :as x029]
     [example.eg.flutter-layout-tutorial :as dlayout]
-    [example.eg.flutter-tts :as tts]))
+    [example.eg.flutter-tts :as tts]
+    [tilton.mx.api
+     :refer [dp] :as mx]))
 
 (defn select []
   ;; NG: tek/x26, tts
-  (todo/make-app))
+  (dp :selectx!)
+  (comment hello counter xo3 x05 x13 dlayout tts)
+  (tts/make-app))
 

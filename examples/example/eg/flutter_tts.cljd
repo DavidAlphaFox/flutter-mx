@@ -201,7 +201,7 @@
     {:future  (cF (let [app (fasc :app)
                         fts ^FlutterTts (mget app :fts)]
                     (.-getLanguages fts)))
-     :builder (cF (fx/->CBAsIs
+     :builder (cF (fx/cb-as-is
                     (fn [ctx ^#/(m/AsyncSnapshot dynamic) snapshot]
                       (dp :snapshot snapshot)
                       (fx-render ctx

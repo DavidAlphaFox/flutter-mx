@@ -16,8 +16,8 @@
 
 (defn make-app []
   (fx/material-app
-    {:key   (fx/in-my-context [me ctx]
-              (fx/widget-key me ctx :matapp))
+    {:key (fx/in-my-context [me ctx]
+                (fx/widget-key me ctx :matapp))
      :title "Flutter/MX Counter Demo"
      :theme (m/ThemeData
               .colorScheme (m/ColorScheme.fromSeed
@@ -29,15 +29,8 @@
                  :backgroundColor #_m/Colors.purple
                  ;; todo get this working (s/b light purple:
                  (cF (fx/in-my-context [me ctx]
-                                       (.-inversePrimary (.-colorScheme (m/Theme.of ctx)))))}
-                {:unwrapped? true})
-       #_ (fx/preferred-size
-                               {:preferredSize (.fromHeight m/Size 72)}
-                               (app-bar {:title (m/Text "Flutter/MX Counter Classico")
-                                       :backgroundColor #_m/Colors.purple
-                                       ;; todo get this working (s/b light purple:
-                                       (cF (fx/in-my-context [me ctx]
-                                             (.-inversePrimary (.-colorScheme (m/Theme.of ctx)))))}))
+                       (.-inversePrimary (.-colorScheme (m/Theme.of ctx)))))}
+         {:unwrapped? true})
        :floatingActionButton (floating-action-button
                                {:onPressed (as-dart-callback []
                                              (mswap! (fm* :the-counter) :counter inc))

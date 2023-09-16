@@ -25,7 +25,7 @@
                          (-> (Theme/of ctx) .-textTheme .-displayLarge))}
         (str (mx/fmuval :ctr-col)))
       (fx/elevated-button
-        {:onPressed (fx/->CBAsIs
+        {:onPressed (fx/cb-as-is
                       (fn ^void []
                         (mx/mswap! (mx/fm* :ctr-col) :value inc)))}
         (fx/text "+")))))

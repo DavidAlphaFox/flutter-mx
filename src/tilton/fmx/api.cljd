@@ -16,16 +16,11 @@
     [tilton.mx.api :refer [rmap-set! rmap-meta-set! make mget mget? mkids mswap! cFkids] :as mx]
     [tilton.fmx.factory :refer [deftag deftags deftags-plus] :as fxf]))
 
-(deftype CBAsIs [value]
-  ;; tells fx-resolve to leave mx value untouched
-  ;; used originally so a FX callback (the builder for AnimatedBuilder) was not
-  ;; treated as callback to MX to get the resolved value.
-  :extends mxf/MXImplementer)
-
-(deftype CBToResolve [value]
-  ;; tells fx-resolve to call the mx value as a function of ctx and me.
-  ;; used where app needs to see the Flutter context to decide a value
-  :extends mxf/MXImplementer)
+(defn cb-as-is
+  "Identifies FN as callback to be given to Flutter 'as is'"
+  ; some callbacks are used to defer thins until a build function context is in hand
+  [fn]
+  (fxf/->CBAsIs fn))
 
 (defn widget-key-clear []
   (fxf/widget-key-clear))
@@ -33,78 +28,8 @@
 (defn widget-key
   ([me ctx] (widget-key me ctx :untag))
   ([me ctx tag]
+   (dp :API-widg-key! (minfo me))
    (fxf/widget-key me ctx tag)))
-
-(defn fx-resolve-mget? [me prop ctx]
-  (fx-resolve prop me ctx
-    (mget? me prop)))
-
-(defn fx-resolve
-  ([me ctx widget-value]
-   (fx-resolve :anon me ctx widget-value))
-  ([prop me ctx widget-value]
-   ;(dp :resolving prop (minfo me) widget-value)
-   (wtrx [0 1000 nil :RESO prop (minfo me)]
-     (let [resolved
-           (cond
-             (nil? widget-value)
-             (do
-               (dpx :fx-res-nil!! prop)
-               nil)
-
-             (dart/is? widget-value CBAsIs)
-             (do
-               (dpx :fx-resolve-as-ising!!!!!!!!! prop (minfo me) widget-value)
-               (.-value ^CBAsIs widget-value))
-
-             (dart/is? widget-value CBToResolve)
-             ;; in the past, a naked function given, say, to onPress would be
-             ;; called like (naked-fn me ctx), but with v2 it simply gets passed
-             ;; as the onPress, so we have to do call a CBToResolve value here and
-             ;; then give that recursively to fx-resolve. So if the (cb-val me ctx) below
-             ;; returns a function, /that/ will be passed on to Flutter as is. ie CBToResolve
-             ;; exists so we can use params me and ctx to decide the handler to be given to Flutter.
-             (let [val ^CBToResolve widget-value]
-               (dpx :fx-reso-calling-back!!!!!!! prop (minfo me) widget-value)
-               (let [cb-val (.-value val)]                  ;; ^CBToResolve widget-value)]
-                 (dpx :CBToResolveyields cb-val)
-                 (let [v (cb-val me ctx)]
-                   (dpx :recuring-unwrapped-fn?-return-val v)
-                   (fx-resolve prop me ctx v))
-                 #_(fx-resolve prop me ctx cb-val)))
-
-             (dart/is? widget-value m/Widget)
-             (do
-               (dpx :widget-value-is-widget widget-value)
-               widget-value)
-
-             (fn? widget-value)
-             (do
-               (dpx :fxreso-allowing-naked-fn? widget-value prop (mx/minfo me))
-               widget-value)
-
-             (cty/c-ref? widget-value)
-             (mx-throw (str "fx-resolve sees Cell! " (cinfo widget-value)))
-
-             (mref? widget-value)
-             (do
-               (dpx :fxres-sees-mref (minfo widget-value))
-               (let [fx (fx-render ctx widget-value)]
-                 (dpx :rfx-mdref-yielded-flutter fx)
-                 fx))
-
-             (vector? widget-value)
-             (do (dpx :fxres-seq!!!! prop (count widget-value))
-                 (let [rzd (doall (map (partial fx-resolve me ctx) widget-value))]
-                   (dpx :vec-rez rzd)
-                   rzd))
-
-             :default (do (dpx :fxres-fall-thru-passthru prop (minfo me) widget-value
-                            (when (atom? widget-value)
-                              (deref widget-value)))
-                          widget-value))]
-       ;;(dp :resolved prop resolved)
-       resolved))))
 
 (defn ctx-page-push
   ([ctx fx-page-def]
@@ -123,28 +48,10 @@
   (.pop (-> ctx m/Navigator.of)))
 
 (defn fx-render [ctx fx]
-  (wtrx [0 999 nil :render-entry (minfo fx)]
-    (cond
-      (not (mref? fx))
-      (cond
-        (cty/c-ref? fx)
-        (mx-throw (str "fx-render passed Cell " (deref fx)))
-        :default (do
-                   #_(when-not (string? fx)
-                       (dp :render-sees-not-mref?-passing-thru fx))
-                   fx))
-      :else (let [gen (mget fx :fx-gen)]
-              (dpx :fx-render-sees-gen!! (minfo fx))
-              (chk gen "OBAD: fx-render of model finds no fx-gen: ")
-              ;;(dp :fx-render-records (minfo fx) ctx)
-              ;; nope (fxf/record-fx$ctx fx ctx)
-              (let [g (gen fx ctx)]
-                (dpx :render-genned!!! g)
-                (rmap-meta-set! [:fx-dom fx] g)
-                g)))))
+  (fxf/fx-render ctx fx))
 
 (defmacro in-my-context [[me-var ctx-var] & body]
-  `(tilton.fmx.api/->CBToResolve
+  `(tilton.fmx.factory/->CBToResolve
      (fn [~me-var ~ctx-var]
        ~@body)))
 
@@ -315,12 +222,12 @@
 ;;; these macros try to hide the plumbing without being obscure.
 
 (defmacro as-is [callback-fn]
-  `(tilton.fmx.api/->CBAsIs
+  `(tilton.fmx.factory/->CBAsIs
      ~callback-fn))
 
 (defmacro with-ctx+as-is [[me ctx] callback-fn]
   `(tilton.fmx.api/in-my-context [~me ~ctx]
-     (tilton.fmx.api/->CBAsIs
+     (tilton.fmx.factory/->CBAsIs
        ~callback-fn)))
 
 (defmacro as-dart-callback [[& cb-params] & body]

@@ -5,7 +5,7 @@
     ["package:flutter/painting.dart" :as p]
     [clojure.string :as str]
     [tilton.mx.base :refer [dprn dp dpx]]
-    [tilton.mx.api :refer [cF cI cF+ cFonce mget mswap! mset!]]
+    [tilton.mx.api :as mx :refer [cF cI cF+ cFonce mget mswap! mset!]]
     [tilton.fmx.api :refer [as-dart-callback my-app] :as fx]
     [example.demo.todoMVC.common :refer [my-todo-list] :as cmm]
     [example.demo.todoMVC.todo :refer [td-completed] :as todo]))
@@ -39,6 +39,7 @@
                     :onSubmitted (todo-input-onSubmitted-formula)
                     :controller  (cFonce (fx/standard-text-value-controller me))
                     :key         (fx/in-my-context [me ctx]
+                                   (dp :key-by-context!!!!!!!!! (mx/minfo me))
                                    (fx/widget-key me ctx :todo-input))}
                    {:name  :todo-input
                     :value (cI "")})))
@@ -50,7 +51,7 @@
      ;; todo: composability with fixed arity reusables as case may be.
      :maintainSize          true
      :maintainSemantics     false
-     ;; todo why do not other visis specify these ^^^ vvvv?
+     ;; todo why do not other visis specify these ^^^ vv?
      :maintainInteractivity false
      :maintainAnimation     true
      :maintainState         true}

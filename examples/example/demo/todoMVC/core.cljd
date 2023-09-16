@@ -22,7 +22,7 @@
 ;;;;;; --- the app --------------------------------------------------------
 
 (defn make-app []
-  (let [title "todo z"]
+  (let [title "todo x"]
     (fx/material-app
       {:title title
        :theme app-theme}
@@ -30,24 +30,24 @@
        :db        (cF+ [:async? true
                         :watch (fn [_ me hv-box _ _]
                                  (stg/DB! hv-box))]
-                       (-> hv/Hive hv/HiveX .initFlutter await)
-                       (-> hv/Hive (.openBox "todo")))
+                    (-> hv/Hive hv/HiveX .initFlutter await)
+                    (-> hv/Hive (.openBox "todo")))
        :todo-list (cF (when-let [db (mget me :db)]
                         (assert (stg/DB) (str "DB not populated but cell :db is: " db))
                         ;; Now we can load any existing todos from storage...
                         (todo/make-ToDoList "todo"
-                                            (stg/collection-docs "todo"))))}
+                          (stg/collection-docs "todo"))))}
       (fx/scaffold
         {:appBar                  (todo-app-bar title)
          :persistentFooterButtons [(todos-dashboard)]}
-        {:unwrapped? true} ;; needed
+        {:unwrapped? true}                                  ;; needed todo why needed?
         (fx/ink {:color m/Colors.white}
-                {:unwrapped? true} ;; neeeded
-                (fx/column {}
-                  {:unwrapped? true} ; needed
-                  (input/todo-controls)
-                  (items/todo-items)
-                  (about-credits)))))))
+          {:unwrapped? true}                                ;; neeeded
+          (fx/column {}
+            {:unwrapped? true}                              ; needed
+            (input/todo-controls)
+            (items/todo-items)
+            (about-credits)))))))
 
 ;;; --- the app bar -----------------------------------------------
 (defn todo-app-bar [title]
@@ -93,9 +93,9 @@
             (mapv #(fx/text {:style faint} %) credits)))
         (fx/icon-button
           {:onPressed (as-dart-callback []
-                                        (mswap! (fasc :credits-toggle) :show-credits? not))
+                        (mswap! (fasc :credits-toggle) :show-credits? not))
            :icon      (cF (in-my-context [me ctx]
-                                         (m/Icon (if (mget (fasc :credits-toggle) :show-credits?)
-                                                   m.Icons/info_outline m.Icons/info)
-                                                 .color m/Colors.grey)))})))))
+                            (m/Icon (if (mget (fasc :credits-toggle) :show-credits?)
+                                      m.Icons/info_outline m.Icons/info)
+                              .color m/Colors.grey)))})))))
 

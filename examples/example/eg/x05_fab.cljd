@@ -109,7 +109,7 @@
       (action-button
         :icon (:icon action)
         :onPressed (fx/in-my-context [me ctx]
-                     (fx/->CBAsIs
+                     (fx/cb-as-is
                        #(show-action ctx action)))))))
 
 ;;; -----------------------------------------------------------------
