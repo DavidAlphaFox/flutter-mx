@@ -432,46 +432,6 @@
             (dpx :GENGEN-nobuilder (minfo me))
             (widget-maker me ctx))))
 
-(defn gen-gen-dbg [me ctx widget-maker]
-  (cond
-    (or (tilton.mx.api/mget? me :unwrapped?)
-      (some #{(name (:fx-class @me))} ["PreferredSize"]))
-    (do
-      (dp :GENGEN-unwrapping-by-request (minfo me))
-      (widget-maker me ctx))
-
-    (tilton.mx.model.core/md-reactive? me)
-    (do (dp :GENGEN-wrap-StatefulBuilder (minfo me)
-          (cinfo (tilton.mx.model.core/md-reactive? me)))
-      (with-flutter-ref
-        (dpx :state-wrap!!!!!!! (minfo me) (cinfo (tilton.mx.model.core/md-reactive? me)))
-        (reify :extends (m/StatefulWidget
-                          .key (widget-key me ctx :auto-stateful))
-          (createState [_]
-            (if (tilton.mx.api/mget? me :ticker-mixin)
-              (reify :extends w/State
-                ^:mixin m/SingleTickerProviderStateMixin
-                (^void initState [this]
-                  (tilton.fmx.factory/fx-state-init me this))
-                (build [_ ctx]
-                  (widget-maker me ctx)))
-              (reify :extends w/State
-                (^void initState [this]
-                  (tilton.fmx.factory/fx-state-init me this))
-                (build [_ ctx]
-                  (widget-maker me ctx))))))))
-
-    (tilton.mx.api/mget? me :with-builder-ctx)
-    (do (dp :GENGEN-builder-by-request (minfo me))
-      (with-flutter-ref
-        (w/Builder
-          .builder (fn [ctx]
-                     (dpx :GENGEN-reactive (minfo me))
-                     (widget-maker me ctx)))))
-    :else (do
-            (dp :GENGEN-bare!!!!!! (minfo me))
-            (widget-maker me ctx))))
-
 ;;; --- makers ------------------------------------------------
 
 (defmacro konly-prop [target-prop-name fx-class fx-props mx-props & [only-kid]]
@@ -564,7 +524,7 @@
        (assoc ~mx-props
          :fx-class (quote ~fx-class)
          :fx-gen (fn fgen [me# ctxtop#]
-                   (tilton.fmx.factory/gen-gen-dbg me# ctxtop#
+                   (tilton.fmx.factory/gen-gen me# ctxtop#
                      (fn [~'me ~'ctx]
                        (~fx-class
                          ~@(fx-props>mx (dissoc fx-props :key))))))))))

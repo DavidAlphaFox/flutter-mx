@@ -38,7 +38,7 @@
                                    .contentPadding (m/EdgeInsets.all 9.0))
                     :onSubmitted (todo-input-onSubmitted-formula)
                     :controller  (cFonce (fx/standard-text-value-controller me))
-                    :key         (fx/in-my-context [me ctx]
+                    #_#_ :key         (fx/in-my-context [me ctx]
                                    (dp :key-by-context!!!!!!!!! (mx/minfo me))
                                    (fx/widget-key me ctx :todo-input))}
                    {:name  :todo-input

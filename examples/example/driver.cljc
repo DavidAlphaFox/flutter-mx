@@ -42,5 +42,5 @@
   ;; NG: tek/x26, tts
   (dp :selectx!)
   (comment hello counter xo3 x05 x13 dlayout tts)
-  (tts/make-app))
+  (todo/make-app))
 
