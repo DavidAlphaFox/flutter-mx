@@ -320,7 +320,7 @@
 
 (defn fm-navig [what where & options]
   ;; todo change so *navig-trace* unbound disables this
-  (wtrx (0 100 :fm-navig-entry *trdeep* options (if (mref? where) (minfo where)))
+  (do ;; wtrx (0 100 :fm-navig-entry *trdeep* options (if (mref? where) (minfo where)))
     (fmdp :all :navig-options options)
     (cond
       (> *trdeep* 32)
@@ -356,7 +356,7 @@
                                               :inside? true
                                               :up? false) netkids))
                            (trx nil :no-net-kids)))
-                       (dp :inside-no-kids (minfo where))))
+                       (dpx :inside-no-kids (minfo where))))
 
                 (and (:up? options)
                      (if-let [par (:parent @where)]

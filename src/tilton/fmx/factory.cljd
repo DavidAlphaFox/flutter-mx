@@ -87,8 +87,8 @@
 (defn record-fx$state [me state]
   (dpx :recording-state (minfo me) (fn? state) #_#_cty/*defer-changes* cty/*within-integrity*)
   (mx/with-cc :reco-state
-              ;; todo does this need to be a cell?
-              (mx/mset! me :fx$state state)))
+    ;; todo does this need to be a cell?
+    (mx/mset! me :fx$state state)))
 
 (defn record-fx$state-setter [me state-setter]
   (dpx :recording-builder-state-setter (minfo me) (fn? state-setter) state-setter)
@@ -99,7 +99,7 @@
   (when me
     (if-let [st ^State? (mget? me :fx$state)]
       (do (dpx :nearest-st-bingo-from (minfo me))
-          st)
+        st)
       ;; todo try state-setter
       (when-let [st (fx-state-nearest (mx/mpar))]
         (dpx :got-nearest-st-JIT st (tilton.mx.cell.base/minfo me))
@@ -122,18 +122,18 @@
 
 (defn make-fx [mx-type fx-props custom-props cFkids-form]
   (apply tilton.mx.model.core/make
-         :mx-type mx-type
-         :fx$state (cI nil)
-         :fx$ikeys (remove #{:fx-class :fx-gen :name :key}
-                           (concat (keys fx-props) (keys custom-props)))
-         :kids cFkids-form
-         (concat
-           (vec (apply concat (seq fx-props)))
-           (vec (apply concat (seq custom-props))))))
+    :mx-type mx-type
+    :fx$state (cI nil)
+    :fx$ikeys (remove #{:fx-class :fx-gen :name :key}
+                (concat (keys fx-props) (keys custom-props)))
+    :kids cFkids-form
+    (concat
+      (vec (apply concat (seq fx-props)))
+      (vec (apply concat (seq custom-props))))))
 
 (defn make-fx-dart-widget [fx-props custom-props & [cFkids-form]]
   (make-fx (new tilton.fmx.factory/FXDartWidget)
-           fx-props custom-props cFkids-form))
+    fx-props custom-props cFkids-form))
 
 (defn ^:macro-support fx-class-sym [fx-class]
   (symbol (second (clojure.string/split (str fx-class) #"/"))))
@@ -142,7 +142,7 @@
   (let [kvs (for [[k _] fx-props]
               [(symbol (str "." (name k)))
                `(tilton.fmx.api/fx-resolve ~k ~'me ~'ctx
-                                           (tilton.mx.api/mget ~'me ~k))])]
+                  (tilton.mx.api/mget ~'me ~k))])]
     (apply concat kvs)))
 
 (def ^:dynamic *fx-building?* false)
@@ -162,16 +162,16 @@
     (if-let [^State? state (mget? me :fx$state)]
       (if (.-mounted state)
         (do (dpx :TRG-build-settingimmediatestate (minfo me) (cinfo cell))
-            (trigger-state state me))
+          (trigger-state state me))
         (dpx :TRG-build-settingimmediatestate-UNMOUNTED!! (minfo me) (.-mounted state) (cinfo cell)))
       (if-let [state-setter (:fx$state-setter (meta me))]
         (let [ctx (:fx$ctx (meta me))]
           (dpx :TRG-stateful-ctx!!!!! ctx (.-debugIsDefunct ^m/Element ctx) (minfo me) (cinfo cell))
           (if (.-debugIsDefunct ^m/Element ctx)
             (do (dpx :TRG-not-using-unmounted-state-setter!!!!!!!!! (minfo me))
-                (trigger-state-above (mpar)))
+              (trigger-state-above (mpar)))
             (do (dpx :TRG-build-using-state-setter!!!!!!!!! (minfo me) (cinfo cell))
-                (state-setter (fn [] (do))))))
+              (state-setter (fn [] (do))))))
         (do
           (dpx :TRG-state-trying-above!!! (minfo me) :cause (cinfo cell) (minfo me))
           (trigger-state-above (mpar)))))))
@@ -185,7 +185,7 @@
     (if-let [^State? state (mget? me :fx$state)]
       (if (.-mounted state)
         (do (dpx :TRG-ABOVE-bingo (minfo me))
-            (trigger-state state me))
+          (trigger-state state me))
         (dpx :TRG-ABOVE-UNMOUNTED!! (minfo me)))
       (if-let [state-setter (:fx$state-setter (meta me))]
         (let [ctx (:fx$ctx (meta me))]
@@ -207,7 +207,7 @@
               (dpx :TRG-not-using-unmounted-state-setter!!!!!!!!! (minfo me))
               (trigger-state-above (mpar)))
             (do (dpx :TRG-build-using-state-setter!!!!!!!!! (minfo me))
-                (state-setter (fn [] (do))))))
+              (state-setter (fn [] (do))))))
         (do
           ;; todo expand on this message
           (dpx :TRG-state-trying-above!!! (minfo me))
@@ -219,7 +219,7 @@
   ([^State state me]
    (if (.-mounted state)
      (do (dpx :TGSTATE--BAM!!!! state (minfo me))
-         (.setState state (fn [] (do))))
+       (.setState state (fn [] (do))))
      (dpx :TRG-STATE_STATE_IGNORING_UNMOUNTED state (minfo me)))))
 
 (defn md-quiesce-lost! [cell new-value prior-value]
@@ -228,7 +228,7 @@
     (when prior-value
       (cond
         (mref? prior-value) (wtrx [0 999 nil :mdq-lost-solo!!!!!!! (cinfo cell) :prior (minfo prior-value)]
-                                  (md-quiesce-if-owned! (c-model cell) prior-value))
+                              (md-quiesce-if-owned! (c-model cell) prior-value))
         (coll? new-value) (cond
                             (coll? prior-value)
                             (let [lost (difference (set prior-value) (set new-value))]
@@ -236,11 +236,11 @@
                                 (doseq [md lost]
                                   (when (mref? md)
                                     (wtrx [0 999 nil :mdq-lost-coll-diff (cinfo cell) :lostk (minfo md)]
-                                          (md-quiesce-if-owned! (c-model cell) md))))))
+                                      (md-quiesce-if-owned! (c-model cell) md))))))
                             :else (when (mref? prior-value)
                                     (when-not (some #{prior-value} new-value)
                                       (wtrx [0 999 nil :mdq-solo-not-in-coll (cinfo cell) :solo (minfo prior-value)]
-                                            (md-quiesce-if-owned! (c-model cell) prior-value)))))))))
+                                        (md-quiesce-if-owned! (c-model cell) prior-value)))))))))
 
 (deftype FXDartWidget []
   :extends Model
@@ -269,7 +269,7 @@
   (get @*widget-key* owner))
 (defn widget-key-insert [owner key]
   (assert (not (widget-key-known owner))
-          (str "widget-key-owner already known " (minfo owner) " existing key " (get @*widget-key* owner)))
+    (str "widget-key-owner already known " (minfo owner) " existing key " (get @*widget-key* owner)))
   (swap! *widget-key* assoc owner key))
 
 (defn widget-key
@@ -277,39 +277,45 @@
   ([me ctx tag]
    (dpx :widget-key-entry tag (minfo me))
    (or (widget-key-known me)
-       (let [k (m/GlobalObjectKey me)]
-         (widget-key-insert me k)
-         k))))
+     (let [k (m/GlobalObjectKey me)]
+       (widget-key-insert me k)
+       k))))
 
 (defn gen-gen [me ctx widget-maker]
   (cond
     (or (tilton.mx.api/mget? me :unwrapped?)
-        (some #{(name (:fx-class @me))} ["PreferredSize"]))
+      (some #{(name (:fx-class @me))} ["PreferredSize"]))
     (do
       (dpx :GENGEN-unwrapping-by-request (minfo me))
       (widget-maker me ctx))
 
     (tilton.mx.model.core/md-reactive? me)
     (do (dpx :GENGEN-wrap-StatefulBuilder (minfo me)
-             (cinfo (tilton.mx.model.core/md-reactive? me)))
-        (with-flutter-ref
-          (dpx :state-wrap!!!!!!! (minfo me) (cinfo (tilton.mx.model.core/md-reactive? me)))
-          (reify :extends (m/StatefulWidget .key (widget-key me ctx :auto-stateful))
-            ;; todo support :ticker-mixin
-            (createState [_]
+          (cinfo (tilton.mx.model.core/md-reactive? me)))
+      (with-flutter-ref
+        (dpx :state-wrap!!!!!!! (minfo me) (cinfo (tilton.mx.model.core/md-reactive? me)))
+        (reify :extends (m/StatefulWidget .key (widget-key me ctx :auto-stateful))
+          (createState [_]
+            (if (tilton.mx.api/mget? me :ticker-mixin)
               (reify :extends w/State
-                ;; ^:mixin m/SingleTickerProviderStateMixin
+                ^:mixin m/SingleTickerProviderStateMixin
                 (^void initState [this]
                   (tilton.fmx.factory/fx-state-init me this))
                 (build [_ ctx]
-                  (widget-maker me ctx)))))))
+                  (widget-maker me ctx)))
+              (reify :extends w/State
+                (^void initState [this]
+                  (tilton.fmx.factory/fx-state-init me this))
+                (build [_ ctx]
+                  (widget-maker me ctx))))))))
+
     (tilton.mx.api/mget? me :with-builder-ctx)
     (do (dp :GENGEN-builder-by-request (minfo me))
-        (with-flutter-ref
-          (w/Builder
-            .builder (fn [ctx]
-                       (dpx :GENGEN-reactive (minfo me))
-                       (widget-maker me ctx)))))
+      (with-flutter-ref
+        (w/Builder
+          .builder (fn [ctx]
+                     (dpx :GENGEN-reactive (minfo me))
+                     (widget-maker me ctx)))))
     :else (do
             (dpx :GENGEN-nobuilder (minfo me))
             (widget-maker me ctx))))
@@ -329,12 +335,14 @@
                      (fn [~'me ~'ctx]
                        (dpx :konly-prop-gen ~target-prop-name (tilton.mx.api/minfo ~'me))
                        (~fx-class
-                         .key (or (tilton.mx.api/mget? ~'me :key)
-                                  #_(widget-key ~'me ~'ctx))
+                         .key (tilton.fmx.api/fx-resolve ~'me ~'ctx
+                                (tilton.mx.api/mget? ~'me :key))
+                         #_ (or (tilton.mx.api/mget? ~'me :key)
+                                #_(widget-key ~'me ~'ctx))
                          ; the prop...
                          ~(symbol (str "." (name target-prop-name)))
                          (tilton.fmx.api/fx-resolve :kid1 ~'me ~'ctx
-                                                    (first (tilton.mx.api/mkids ~'me)))
+                           (first (tilton.mx.api/mkids ~'me)))
                          ; other props
                          ~@(fx-props>mx (dissoc fx-props :key)))))))
        (tilton.mx.api/cFkids ~only-kid))))
@@ -354,7 +362,7 @@
                        (~fx-class (tilton.fmx.api/fx-render ~'ctx
                                     (tilton.mx.api/mget ~'me :_param-1))
                          .key (or (tilton.mx.api/mget? ~'me :key)
-                                  #_(widget-key ~'me ~'ctx))
+                                #_(widget-key ~'me ~'ctx))
                          ~@(fx-props>mx (dissoc fx-props :key))))))))))
 
 (defmacro konly-builder [fx-class fx-props mx-props only-kid]
@@ -366,16 +374,16 @@
          :fx-class (quote ~fx-class)
          :fx-gen (fn ~(fx-class-sym fx-class) [me# ctx3#]
                    (tilton.fmx.factory/with-widget [me# ctx3#]
-                                                   (m/Builder
-                                                     .key (or (tilton.mx.api/mget? ~'me :key)
-                                                              #_(widget-key ~'me ~'ctx))
-                                                     .builder (fn [ctx2#]
-                                                                ;; the layout builder wants back a native Flutter widget, so we have to render here
-                                                                (fx/fx-render ctx2# (first (tilton.mx.api/mkids me#))))
-                                                     ~@(let [kvs (for [k# (keys (dissoc fx-props :key))]
-                                                                   [(symbol (str "." (name k#)))
-                                                                    `(tilton.fmx.api/fx-resolve-mget? me# ~k# ctx2#)])]
-                                                         (apply concat kvs))))))
+                     (m/Builder
+                       .key (or (tilton.mx.api/mget? ~'me :key)
+                              #_(widget-key ~'me ~'ctx))
+                       .builder (fn [ctx2#]
+                                  ;; the layout builder wants back a native Flutter widget, so we have to render here
+                                  (fx/fx-render ctx2# (first (tilton.mx.api/mkids me#))))
+                       ~@(let [kvs (for [k# (keys (dissoc fx-props :key))]
+                                     [(symbol (str "." (name k#)))
+                                      `(tilton.fmx.api/fx-resolve-mget? me# ~k# ctx2#)])]
+                           (apply concat kvs))))))
        (tilton.mx.api/cFkids ~only-kid))))
 
 (defmacro kids-prop [target-prop-name fx-class fx-props mx-props & kids]
@@ -390,10 +398,10 @@
                        (dpx :make-widget-sees (.-hashCode ~'ctx) (tilton.mx.api/minfo ~'me))
                        (~fx-class
                          .key (or (tilton.mx.api/mget? ~'me :key)
-                                  #_(widget-key ~'me ~'ctx))
+                                #_(widget-key ~'me ~'ctx))
                          ~(symbol (str "." (name target-prop-name))) ;; the desgignated prop
                          (mapv (partial tilton.fmx.api/fx-render ~'ctx)
-                               (tilton.mx.api/mkids ~'me))
+                           (tilton.mx.api/mkids ~'me))
                          ~@(fx-props>mx (dissoc fx-props :key)))))))
        (tilton.mx.api/cFkids ~@kids))))
 
@@ -411,7 +419,7 @@
                          .key (when-not (widget-key-known ~'me)
                                 (or
                                   (tilton.fmx.api/fx-resolve ~'me ~'ctx
-                                                             (tilton.mx.api/mget? ~'me :key))
+                                    (tilton.mx.api/mget? ~'me :key))
                                   #_(widget-key ~'me ~'ctx)))
                          ~@(fx-props>mx (dissoc fx-props :key))))))))))
 
@@ -444,13 +452,13 @@
                      (cond
                        (tilton.mx.model.core/md-reactive? ~'me)
                        (do (dp :STATEFUL-prop-p1-builder!!!!!!!! (quote ~fx-class) (minfo ~'me))
-                           (w/StatefulBuilder
-                             ;;  .key (tilton.fmx.api/fx-resolve-mget? ~'me :key ~'ctx))
-                             .key (or (tilton.mx.api/mget? ~'me :key)
-                                      #_(widget-key ~'me ~'ctx))
-                             .builder (fn [~'ctx setStateCallback#]
-                                        (tilton.fmx.factory/record-fx$state-setter ~'me setStateCallback#)
-                                        (make-widget))))
+                         (w/StatefulBuilder
+                           ;;  .key (tilton.fmx.api/fx-resolve-mget? ~'me :key ~'ctx))
+                           .key (or (tilton.mx.api/mget? ~'me :key)
+                                  #_(widget-key ~'me ~'ctx))
+                           .builder (fn [~'ctx setStateCallback#]
+                                      (tilton.fmx.factory/record-fx$state-setter ~'me setStateCallback#)
+                                      (make-widget))))
                        :else (do
                                (dpx :STATELESS-builder!!! (quote ~fx-class) (minfo ~'me))
                                (make-widget)))))))))
@@ -471,7 +479,7 @@
                    (tilton.fmx.factory/with-flutter-ref
                      (~fx-class
                        .key (or (tilton.mx.api/mget? ~'me :key)
-                                #_(widget-key ~'me ~'ctx))
+                              #_(widget-key ~'me ~'ctx))
                        ~@(fx-props>mx (dissoc fx-props :key))))))
        (tilton.mx.api/cFkids ~@children))))
 
@@ -487,9 +495,9 @@
          :fx-gen (fn fgen [~'me ~'ctx]
                    (reify :extends (m/StatefulWidget
                                      .key (or (tilton.mx.api/mget? ~'me :key)
-                                              #_(widget-key ~'me ~'ctx)))
+                                            #_(widget-key ~'me ~'ctx)))
                      (~'createState [_#]
-                       (if (tilton.mx.api/mget? ~'me :ticker-mixin) ;; todo propagate ticker support
+                       (if (tilton.mx.api/mget? ~'me :ticker-mixin) ;; todo replicate in other factories and gen-gen
                          (reify :extends w/State
                            ^:mixin m/SingleTickerProviderStateMixin
                            (^void ~'initState [this]
@@ -497,10 +505,10 @@
                            (~'build [_# ~'ctx]
                              (dpx :OSK-k1-child-stateful!!!!!!!!!!!!! (tilton.mx.api/minfo ~'me))
                              (let [k1# (tilton.fmx.api/fx-resolve :kid1 ~'me ~'ctx
-                                                                  (first (tilton.mx.model.core/mkids ~'me)))]
+                                         (first (tilton.mx.model.core/mkids ~'me)))]
                                (~fx-class
                                  .key (or (tilton.mx.api/mget? ~'me :key)
-                                          #_(widget-key ~'me ~'ctx))
+                                        #_(widget-key ~'me ~'ctx))
                                  .child k1#
                                  ~@(fx-props>mx (dissoc fx-props :key))))))
                          (reify :extends w/State
@@ -509,10 +517,10 @@
                            (~'build [_# ~'ctx]
                              (dpx :OSK-k1-child-stateful!!!!!!!!!!!!! (tilton.mx.api/minfo ~'me))
                              (let [k1# (tilton.fmx.api/fx-resolve :kid1 ~'me ~'ctx
-                                                                  (first (tilton.mx.model.core/mkids ~'me)))]
+                                         (first (tilton.mx.model.core/mkids ~'me)))]
                                (~fx-class
                                  .key (or (tilton.mx.api/mget? ~'me :key)
-                                          #_(widget-key ~'me ~'ctx))
+                                        #_(widget-key ~'me ~'ctx))
                                  .child k1#
                                  ~@(fx-props>mx (dissoc fx-props :key)))))))))))
        (tilton.mx.api/cFkids ~child))))
@@ -537,7 +545,7 @@
                    (tilton.fmx.factory/with-flutter-ref
                      (~fx-class
                        .key (or (tilton.mx.api/mget? ~'me :key)
-                                #_(widget-key ~'me ~'ctx))
+                              #_(widget-key ~'me ~'ctx))
                        ~@(let [kvs (for [k# (conj (keys (dissoc fx-props :key)) :builder)]
                                      [(symbol (str "." (name k#)))
                                       `(tilton.fmx.api/fx-resolve-mget? ~'me ~k# ~'ctx)])]

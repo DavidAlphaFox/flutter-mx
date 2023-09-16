@@ -262,14 +262,14 @@
   (let [prop (or prop ':value)
         me-ref (or me 'me)]
     `(let [other# (tilton.mx.model.core/fm-navig (fn [node#]
-                                                   (when (mget? node# :name)
+                                                   #_ (when (mget? node# :name)
                                                      (dp :fmuval-sees (mget? node# :name)
                                                        (mget? node# :selection)))
                                                    (= ~name (mget? node# :name)))
                     ~me-ref :me? false :up? true :inside? false)]
        ;; (tilton.mx.model.peek/chk other# (str "fmuv> did not find other named " ~name " seeking property " ~prop))
-       (dp :BAM!-other!!!!!!! (tilton.mx.api/minfo other#))
-       (dp :BAM! ~prop (tilton.mx.model.core/mget other# ~prop))
+       (dpx :BAM!-other!!!!!!! (tilton.mx.api/minfo other#))
+       (dpx :BAM! ~prop (tilton.mx.model.core/mget other# ~prop))
        (tilton.mx.model.core/mget other# ~prop))))
 
 (defn mxu-find-id
