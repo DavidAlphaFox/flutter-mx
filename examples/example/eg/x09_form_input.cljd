@@ -23,7 +23,7 @@
                                            .content (m/Text (.-text ^m/TextEditingController
                                                               (md/mget (md/fm* :test-input) :controller))))))))
             :tooltip   "Show me the value!"}
-           {:with-builder-ctx true}
+           {:with-builder? true}
            (m/Icon m/Icons.text_fields))}
         (fx/column {:mainAxisAlignment m/MainAxisAlignment.center}
           (fx/text "Enter some text, then hit the FAB!")

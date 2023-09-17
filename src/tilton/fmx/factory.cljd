@@ -421,7 +421,7 @@
                 (build [_ ctx]
                   (widget-maker me ctx))))))))
 
-    (tilton.mx.api/mget? me :with-builder-ctx)
+    (tilton.mx.api/mget? me :with-builder?)
     (do (dp :GENGEN-builder-by-request (minfo me))
       (with-flutter-ref
         (w/Builder

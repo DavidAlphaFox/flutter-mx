@@ -18,7 +18,7 @@
       (scaffold
         {:appBar (app-bar {:title (text title)})}
         (center
-          ; with-ctx alternative: (fx/builder-ctx ... ;; <============ option 1
+          ; with-ctx alternative: (fx/builder ... ;; <============ option 1
           (elevated-button
             {:onPressed (as-dart-callback []
                           (.showSnackBar (m/ScaffoldMessenger.of ctx)
@@ -27,6 +27,6 @@
                                                      .label "Undo!"
                                                      .onPressed (fn [] (dart:core/print :UNDO!!!!!)))
                                           :content (text "Yay! A SnackBar!")}))))}
-            {:with-builder-ctx true}                                ;; <============== option 2
+            {:with-builder? true}                                ;; <============== option 2
             (text "Show text")))))))
 

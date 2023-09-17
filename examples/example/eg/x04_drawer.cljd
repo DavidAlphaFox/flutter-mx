@@ -26,8 +26,8 @@
                           :onTap (fx/in-my-context [me ctx]
                                    (fx/cb-as-is
                                      #(.pop (m/Navigator.of ctx))))}
-                         {:with-builder-ctx true})
-                       (fx/builder-ctx
+                         {:with-builder? true})
+                       (fx/builder
                          (fx/list-tile
                            {:title (m/Text "Item 2")
                             :onTap (fx/in-my-context [me ctx]
