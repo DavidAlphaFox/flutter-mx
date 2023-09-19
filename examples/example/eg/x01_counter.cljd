@@ -28,7 +28,8 @@
           (text {:style (p/TextStyle .color m/Colors.black
                           .fontSize 14.0)}
             "You have pushed the button this many times:")
-          (sized-box {:height 14.0})
+          (sized-box
+            {:height (cF (+ 14.0 (* 14 (mget (fasc :scaffo) :counter))))})
           (text
             {:style (in-my-context [me ctx]
                       (.-headline4 (.-textTheme (m/Theme.of ctx))))}
