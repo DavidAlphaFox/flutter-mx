@@ -99,7 +99,7 @@
   `(tilton.mx.api/mget ~'me :animation))
 
 (defmacro my-state []
-  `(tilton.mx.api/mget ~'me :fx$state))
+  `(:fx$state (meta ~'me)))
 
 ;;; ---- sundry factories per Flutter variation on statefulness, child/children/content/body ------------------
 

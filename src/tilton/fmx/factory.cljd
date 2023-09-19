@@ -80,15 +80,13 @@
 ;;; --- state tracking -----------------
 
 (defn fx-state-init [me state]
-  (tilton.fmx.factory/record-fx$state me state)
+  (record-fx$state me state)
   (when-let [init (tilton.mx.api/mget? me :initState)]
     (init state me)))
 
 (defn record-fx$state [me state]
   (dpx :recording-state (minfo me) (fn? state) #_#_cty/*defer-changes* cty/*within-integrity*)
-  (mx/with-cc :reco-state
-    ;; todo does this need to be a cell?
-    (mx/mset! me :fx$state state)))
+  (rmap-meta-set! [:fx$state me] state))
 
 (defn record-fx$state-setter [me state-setter]
   (dpx :recording-builder-state-setter (minfo me) (fn? state-setter) state-setter)
@@ -97,7 +95,7 @@
 (defn fx-state-nearest [me]
   (dp :state-nearest-entry (mx/minfo me))
   (when me
-    (if-let [st ^State? (mget? me :fx$state)]
+    (if-let [st ^State? (:fx$state (meta me))]
       (do (dpx :nearest-st-bingo-from (minfo me))
         st)
       ;; todo try state-setter
@@ -123,7 +121,6 @@
 (defn make-fx [mx-type fx-props custom-props cFkids-form]
   (apply tilton.mx.model.core/make
     :mx-type mx-type
-    :fx$state (cI nil)
     :fx$ikeys (remove #{:fx-class :fx-gen :name :key}
                 (concat (keys fx-props) (keys custom-props)))
     :kids cFkids-form
@@ -159,7 +156,7 @@
 (defn trigger-build [me cell]
   (when-not *fx-building?*                                  ;; todo vestigial?
     (dpx :TRG-build :pulse (cz/pulse-now) :c (cinfo cell) :me (minfo me))
-    (if-let [^State? state (mget? me :fx$state)]
+    (if-let [^State? state (:fx$state (meta me))]
       (if (.-mounted state)
         (do (dpx :TRG-build-settingimmediatestate (minfo me) (cinfo cell))
           (trigger-state state me))
@@ -182,7 +179,7 @@
     (dpx :TRG-ABOVE-WARNING!!!!!!-setstate-above-topped-out))
   (when me
     ;; todo why is :fx$state in me but fx$state-setter in meta
-    (if-let [^State? state (mget? me :fx$state)]
+    (if-let [^State? state (:fx$state (meta me))]
       (if (.-mounted state)
         (do (dpx :TRG-ABOVE-bingo (minfo me))
           (trigger-state state me))

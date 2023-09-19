@@ -94,7 +94,7 @@
           "...> FYI: instance meta is " (meta me) "\n.")
         (mx-throw
           "MXAPI_ILLEGAL_MUTATE_NO_SUCH_SLOT> mset! was attempted on non-existent prop \"" prop "\".\n"
-          "...> FYI: known non-internal slots are" (keys (dissoc @me :host :parent :fx$ikeys :fx$state :fx-class :fx-gen)))))))
+          "...> FYI: known non-internal slots are" (keys (dissoc @me :host :parent :fx$ikeys :fx-class :fx-gen)))))))
 
 (defn mswap! [me prop swap-fn & swap-fn-args]
   (chk me (str "mswap! passed nil for me accessing prop: " prop))
@@ -103,7 +103,7 @@
     (mset! me prop (apply swap-fn (mget me prop) swap-fn-args))
     (mx-throw
       "MXAPI_ILLEGAL_MUTATE_NO_SUCH_SLOT> mswap! was attempted on non-extant prop \"" prop "\".\n"
-      "...> FYI: known non-internal slots are" (keys (dissoc @me :host :parent :fx$ikeys :fx$state :fx-class :fx-gen)))))
+      "...> FYI: known non-internal slots are" (keys (dissoc @me :host :parent :fx$ikeys :fx-class :fx-gen)))))
 
 (defn mupdate! [me prop swap-fn & swap-fn-args]
   (chk me (str "mupdate! passed nil as `me` accessing prop: " prop))
@@ -112,7 +112,7 @@
     (mset! me prop (apply swap-fn (without-c-dependency (mget me prop)) swap-fn-args))
     (mx-throw
       "MXAPI_ILLEGAL_MUTATE_NO_SUCH_SLOT> mupdate! was attempted on non-extant prop \"" prop "\".\n"
-      "...> FYI: known non-internal slots are" (keys (dissoc @me :host :parent :fx$ikeys :fx$state :fx-class :fx-gen)))))
+      "...> FYI: known non-internal slots are" (keys (dissoc @me :host :parent :fx$ikeys :fx-class :fx-gen)))))
 
 (def +md-sid+ (atom 0))
 (defn md-sid [me]
@@ -142,7 +142,7 @@
                  :meta {:state      :nascent
                         ;; todo pull more fx$s into meta
                         :mx-type    (:mx-type iargs (Model.))
-                        :fx$quiesce (:fx$quiesce iargs (Model.))
+                        :fx$quiesce (:fx$quiesce iargs)
                         :sid        (swap! +md-sid+ inc)})]
         ;(dp :make-post-me (meta me))
         (rmap-meta-set!
@@ -167,8 +167,7 @@
   ;; todo should this be memoized?
   [me]
   (some (fn [[ky c]]
-          (when (and c (not (some #{ky} [:fx$state])))
-            ;; todo ^^^ should we handle :fx$state as a cell?!!
+          (when c
             ;; (dp :MDR?-sees ky (cinfo c) :me (minfo me))
             (when (or (c-input? c)
                     (c-formula? c))

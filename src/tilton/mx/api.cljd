@@ -189,6 +189,15 @@
     `(let [name# ~name]
        (tilton.mx.model.core/fm-ascendant name# ~me-ref))))
 
+(defmacro fasc "Search strictly up"
+  [name & [me]]
+  (let [me-ref (or me 'me)]
+    `(let [name# ~name]
+       (tilton.mx.model.core/fm-ascendant name# ~me-ref))))
+
+(defmacro maprop [prop-name]
+  `(tilton.mx.api/faprop ~prop-name ~'me))
+
 (defn faprop "Search strictly up and mget value of first asc w that property"
   ([prop-name md]
    (faprop prop-name md md))
