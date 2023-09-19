@@ -25,7 +25,7 @@
     [example.demo.todoMVC.core :as todo]
     ;[tilton.faq.navig-cycle :as faq-nav] ;; no make-app! use make-app-fail or make-app-fixed
     [example.eg.x25-flutter-tex :as tek]
-    [example.eg.x26-latex-sandbox :as x26]
+    [example.eg.x26-latex-sandbox :as tekbox]
     [example.eg.x27-popup-menu :as x27]
     [example.eg.x028-bottom-navbar :as x028]
     ;[example.eg.x029_layout_builder :as x029]
@@ -35,12 +35,11 @@
     [example.eg.x029a-layout-kid-builder :as x029]
     [example.eg.flutter-layout-tutorial :as dlayout]
     [example.eg.flutter-tts :as tts]
-    [tilton.mx.api
-     :refer [dp] :as mx]))
+    [tilton.mx.api :refer [dp] :as mx]))
 
 (defn select []
   ;; NG: tek/x26, tts
   (dp :selectx!)
   (comment hello counter xo3 x05 x13 dlayout tts)
-  (todo/make-app))
+  (tekbox/make-app))
 

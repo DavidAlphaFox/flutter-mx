@@ -10,6 +10,13 @@
     ["package:flutter/painting.dart" :as p]
     ["package:flutter_tex/flutter_tex.dart" :as tk]))
 
+;;; --- WARNING!!!! ----------------------------------------------
+;;; Requires extra device-specific configuration.
+;;; See: https://pub.dev/packages/flutter_tex#ios
+;;;
+;;; ALSO!!!! Not yet working on Web
+
+
 ;; In this example we simply see pure Flutter widgets -- no f/mx, no cljd/widget -- included
 ;; in a larger f/mx setting. In the next example we will get fancier and do a LaTeX sandbox.
 
@@ -29,8 +36,6 @@
       (center
         (column
           {:mainAxisAlignment m/MainAxisAlignment.spaceEvenly}
-          (m/Text "bam")
-          (m/Text "boom")
           (tk/TeXView
             .child (tk/TeXViewColumn
                      .children

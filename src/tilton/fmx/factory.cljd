@@ -543,6 +543,7 @@
                          ~@(fx-props>mx fx-props)))))))))
 
 (defmacro prop-param1-kidless [prop fx-class fx-props mx-props]
+  ; todo convert to gen-gen? At least lose StatefulBuilder
   (let []
     `(tilton.fmx.factory/make-fx-dart-widget
        ~fx-props

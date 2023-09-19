@@ -45,17 +45,11 @@
                             .curve m/Curves.fastOutSlowIn
                             .reverseCurve m/Curves.easeOutQuad
                             .parent cont))))
-     ;; todo how does this next ever run?
+     ;; todo how does this next ever run? md-quiesce?
      :dispose          (fn [state me]
                          (when-let [controller ^m/AnimationController (fx/my-controller? :dispo)]
                            (.dispose controller)))
      ; --- animation mechanics ----------------------
-
-     ; unrelated: retrieve state with some findAncestor tool
-     ; WHY? we do not search up for state anywhere?
-     ; (#/(.getElementForInheritedWidgetOfExactType InheritedBindings) ~closest-context)
-     ; ScrollableState? scrollable = context.findAncestorStateOfType<ScrollableState>();
-     ; (#/(.findAncestorStateOfType State) ^m/BuildContext ctx)
 
      ; --- behavior -------------------------
      :step             (/ 90.0 (dec (count actions)))
