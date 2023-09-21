@@ -35,10 +35,11 @@
     [example.eg.x029a-layout-kid-builder :as x029]
     [example.eg.flutter-layout-tutorial :as dlayout]
     [example.eg.flutter-tts :as tts]
+    [example.eg.x045-websocket :as wsc]
     [tilton.mx.api :refer [dp] :as mx]))
 
 (defn select []
   ;; NG: tek/x26, tts
   (comment hello counter xo3 x05 x13 dlayout tts)
-  (counter/make-app))
+  (wsc/make-app))
 

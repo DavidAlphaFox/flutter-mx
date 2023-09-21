@@ -1,0 +1,46 @@
+;; package:web_socket_channel/web_socket_channel.dart
+(ns example.eg.x045-websocket
+  (:require
+    [clojure.string :as str]
+    [tilton.mx.api :refer [cF cF+ cFn cI dp minfo mget mset! mswap!] :as md]
+    [tilton.fmx.api :as fx
+     :refer [scaffold app-bar text center column hero material-app]]
+    ["package:flutter/widgets.dart" :as w]
+    ["package:flutter/material.dart" :as m]
+    ["package:flutter/painting.dart" :as p]
+    ["package:web_socket_channel/web_socket_channel.dart" :as wsc]))
+
+(defn make-app []
+  (material-app
+    {:title "Flutter/MX Hello WebSocket"
+     :theme (cF (m/ThemeData .primarySwatch m/Colors.teal))}
+    (scaffold
+      {:appBar (app-bar
+                 {:title (m/Text "Welcome to WebSockets/MX")})}
+      (center
+        (column
+          {:mainAxisAlignment m/MainAxisAlignment.spaceEvenly}
+          (text {:overflow p.TextOverflow/ellipsis
+                 :style    (p/TextStyle
+                             .color m/Colors.cyan
+                             .fontSize 32.0)}
+            {:channel (cF+ [:watch (fn [_ me new prior c]
+                                     (dp :watch-sees-wsc new)
+                                     (.listen (.-stream new)
+                                       (fn [message]
+                                         (dp :message message (rand-int 99))
+                                         (mset! me :msg message)
+                                         )))]
+                        (.connect wsc/WebSocketChannel
+                          (Uri.parse "ws://localhost:10000/.ws")))
+             :msg (cI nil :watch (fn [_ me msg _ _]
+                                   (dp :cI-msg!!!!! msg)
+                                   (when-let [c (mget me :channel)]
+                                     (.add (.-sink c) (str "received" (rand-int 99))))))}
+            "hello, web socket.\\n")
+
+          (text {:overflow p.TextOverflow/ellipsis
+                 :style    (p/TextStyle
+                             .color m/Colors.cyan
+                             .fontSize 16.0)}
+            "Brian Kernighan"))))))
