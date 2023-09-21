@@ -52,7 +52,7 @@
                                        (> (mget me :font-size) 25) m/Colors.red
                                        :else m/Colors.cyan))}
                     (str (mget (fasc :the-app) :msg)
-                      "in font size "
+                      "\nin font size "
                       (/ (int (* 10 (mget me :font-size))) 10))))))))))))
 
 

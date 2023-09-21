@@ -39,7 +39,6 @@
 
 (defn select []
   ;; NG: tek/x26, tts
-  (dp :selectx!)
   (comment hello counter xo3 x05 x13 dlayout tts)
   (counter/make-app))
 

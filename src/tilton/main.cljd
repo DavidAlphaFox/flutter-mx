@@ -29,8 +29,9 @@
     (fx/run-fx-app
       ;; Change the  namespace below to one above and rebuild to see a different example.
       ;; ------ VVVVV either/or next two--------------------------------------------
-      (counter/make-app)
-      #_ (eg/select))) ;; <--- cannot use when excluding examples dir in deps.edn
+      (if false
+        (counter/make-app)
+        (eg/select)))) ;; <--- cannot use when excluding examples dir in deps.edn
 
   ;; (testing/run-tests)
   (dp :main-exit))

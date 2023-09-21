@@ -2,18 +2,15 @@
   (:require
     ["dart:math" :as math]
     [cljd.flutter.alpha :as f]
-    [tilton.mx.cell.base :as cbase]
+
     [tilton.mx.model.peek :refer [Model minfo mref?]]
-    [tilton.mx.base :refer [trx dpx dp]]
     [tilton.mx.api :refer [cF cF+ cI mget fmuv] :as mx]
     [tilton.fmx.api :refer [as-dart-callback] :as fx]
-    [tilton.fmx.factory :as fmk]
     ["package:flutter/widgets.dart" :as w]
     ["package:flutter/material.dart" :as m]))
 
 (defn make-app []
   (fx/material-app {:title "Expandable Fab"}
-    {:name :mat-app}
     (fx/scaffold
       {:appBar               (fx/app-bar {:title (fx/text "Expandable FAB")})
        :floatingActionButton (expandable-fab
@@ -51,7 +48,6 @@
                            (.dispose controller)))
      ; --- animation mechanics ----------------------
 
-     ; --- behavior -------------------------
      :step             (/ 90.0 (dec (count actions)))
      :open?            (cI initial-open?)
      :ani-dir          (cF+ [:watch (fn [prop-name me new-value prior-value cell]
@@ -64,13 +60,12 @@
     (fx/stack
       {:alignment    m/Alignment.bottomRight
        :clipBehavior m/Clip.none}
-      {:name :fab-stack}
       (tap-to-close-fab me)
       ;; Matrix always flattens children, and discards nils, so we can offer a collection mid-children
       (doall (map-indexed
                (fn [i action]
                  (expanding-action-button me
-                   :direction-degrees (* i #_ 30.0 (fmuv :fab :step))
+                   :direction-degrees (* i (fmuv :fab :step))
                    :max-distance distance
                    :progress-key :expand-animation
                    :action action))
@@ -96,7 +91,6 @@
                           .angle (* (- 1.0 (.-value progress))
                                    math/pi 0.5))
                         child))))}
-    {:name :ani-builder}
     (fx/fade-transition
       {:opacity (fx/in-my-context [me ctx]
                   (fx/state-prop-get (mx/fasc :fab) :expand-animation))}
@@ -120,8 +114,7 @@
                    {:actions [(m/TextButton
                                 .onPressed #(-> ctx m/Navigator.of .pop)
                                 .child (m/Text "CLOSE"))]}
-                   {}
-                   (fx/text {} {} (:title action)))))))
+                   (fx/text (:title action)))))))
 
 (defn action-button [& {:keys [onPressed icon]}]
   (fx/material {:shape        (m/CircleBorder)
@@ -143,9 +136,7 @@
                     :clipBehavior m/Clip.antiAlias
                     :elevation    4.0}
         (fx/ink-well {:onTap (as-dart-callback []
-                               (assert (mref? par :par-close))
                                (let [fb (mx/fasc :fab par)]
-                                 (assert (mref? fb :fb-close))
                                  (mx/mswap! fb :open? not)))}
           (fx/padding {:padding (m/EdgeInsets.all 8.0)}
             (fx/icon {:icon  m/Icons.close
@@ -170,10 +161,7 @@
          :duration (dart:core/Duration .milliseconds 250)}
         (fx/floating-action-button
           {:onPressed (as-dart-callback []
-                        (assert (mref? par :par-open))
-                        (let [fb (mx/fasc :fab par)]
-                          (assert (mref? fb :fb-open))
-                          (mx/mswap! fb :open? not)))}
+                        (mx/mswap! (mx/fasc :fab par) :open? not))}
           (fx/icon {:icon m/Icons.create}
             {:name :fabicon-open}))))))
 

@@ -318,7 +318,7 @@
       :else (when it (dp :ignoring-prop-val it)))))
 
 (defn fm-navig [what where & options]
-  ;; todo change so *navig-trace* unbound disables this
+  ;; todo change so *navig-trace* unbound disables this, so lib users can enable/disable
   (do                                                       ;; wtrx (0 100 :fm-navig-entry *trdeep* options (if (mref? where) (minfo where)))
     (fmdp :all :navig-options options)
     (cond
@@ -329,7 +329,8 @@
 
       (and where what (atom? where))
       (let [options (merge {:me? false, :inside? false, :up? true, :wocd? true ;; without-c-dependency
-                            } (apply hash-map options))]
+                            :must? false} ;; todo test
+                      (apply hash-map options))]
         ;;(dp :fm-NET-navig-opts (assoc options :skip (minfo (:skip options))))
         (binding [*depender* (if (:wocd? options) nil *depender*)]
           (when (mref? where)

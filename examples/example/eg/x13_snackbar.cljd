@@ -12,21 +12,21 @@
 ;;           ^^^ Copyright 2022 by Tensegritics, Eclipse
 
 (defn make-app []
-  (let [title (str "Snackbar Demo #" (rand-int 99))]
+  (let [title "Snackbar Demo"]
     (material-app
       {:title title}
       (scaffold
         {:appBar (app-bar {:title (text title)})}
         (center
-          ; with-ctx alternative: (fx/builder ... ;; <============ option 1
-          (elevated-button
-            {:onPressed (as-dart-callback []
-                          (.showSnackBar (m/ScaffoldMessenger.of ctx)
-                            (fx-render ctx
-                              (snack-bar {:action  (m/SnackBarAction
-                                                     .label "Undo!"
-                                                     .onPressed (fn [] (dart:core/print :UNDO!!!!!)))
-                                          :content (text "Yay! A SnackBar!")}))))}
-            {:with-builder? true}                                ;; <============== option 2
-            (text "Show text")))))))
+          (fx/builder
+            (elevated-button
+              {:onPressed (as-dart-callback []
+                            (.showSnackBar (m/ScaffoldMessenger.of ctx)
+                              (fx-render ctx
+                                (snack-bar {:action  (m/SnackBarAction
+                                                       .label "Undo!"
+                                                       .onPressed (fn [] (dart:core/print :UNDO!!!!!)))
+                                            :content (text "Yay! A SnackBar!")}))))}
+              ;; {:with-builder? true}                                ;; <============== option 2
+              (text "Show text"))))))))
 

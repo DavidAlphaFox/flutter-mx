@@ -38,7 +38,7 @@
                               (.-textTheme ^m/ThemeData (maprop :theme))))}
             {:name    :the-counter
              :counter (cI 0)}
-            (str (mget me :counter))))))))
+            (str (maprop :counter))))))))
 
 
 
