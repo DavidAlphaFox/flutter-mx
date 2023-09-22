@@ -382,13 +382,13 @@
 (defn widget-key
   ([me ctx] (widget-key me ctx :untag))
   ([me ctx tag]
-   (dpx :FXF-widget-key-entry tag (minfo me))
-   (or (widget-key-known me)
-     #_ (fx-resolve me ctx
-       (mx/mget? me :key))
-     (let [k (m/GlobalObjectKey me)]
-       (widget-key-insert me k)
-       k))))
+   (let [obj me #_ (:sid (meta me))
+         known (widget-key-known obj)]
+     (or known
+       (let [k (m/GlobalObjectKey obj)]
+         (widget-key-insert obj k)
+         (dpx :FXF-key!!!! obj k)
+         k)))))
 
 (defn gen-gen [me ctx widget-maker]
   (cond
@@ -405,6 +405,7 @@
         (dpx :state-wrap!!!!!!! (minfo me) (cinfo (tilton.mx.model.core/md-reactive? me)))
         (reify :extends (m/StatefulWidget .key (widget-key me ctx :auto-stateful))
           (createState [_]
+            (dpx :crestate-entry (minfo me) (tilton.mx.api/mget? me :ticker-mixin))
             (if (tilton.mx.api/mget? me :ticker-mixin)
               (reify :extends w/State
                 ^:mixin m/SingleTickerProviderStateMixin
@@ -414,8 +415,10 @@
                   (widget-maker me ctx)))
               (reify :extends w/State
                 (^void initState [this]
+                  (dpx :initstate-entry (minfo me) (tilton.mx.api/mget? me :ticker-mixin))
                   (tilton.fmx.factory/fx-state-init me this))
                 (build [_ ctx]
+                  (dpx :build-entry (minfo me) (tilton.mx.api/mget? me :ticker-mixin))
                   (widget-maker me ctx))))))))
 
     (tilton.mx.api/mget? me :with-builder?)
