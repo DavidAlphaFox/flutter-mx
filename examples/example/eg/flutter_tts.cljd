@@ -5,8 +5,11 @@
     ["package:flutter/painting.dart" :as p]
     ["package:flutter_tts/flutter_tts.dart" :refer [FlutterTts] :as fts]
     [clojure.string :as str]
+    [tilton.mx.cell.base
+     :refer [without-c-dependency *within-integrity*]]
     [tilton.mx.api :as mx
-     :refer [dp dpx cI cF cF+ cF+n cFn cFonce mget mget? mset! minfo fasc fmu maprop]]
+     :refer [dp dpx cI cF cF+ cF+n cFn cFonce mget mget? mset! minfo fasc fmu fm* maprop
+             with-mx-isolation]]
     [tilton.fmx.api :as fx
      :refer [scaffold app-bar text center column hero material-app
              container row expanded icon padding
@@ -30,6 +33,13 @@
      :fts           (cF+ [:watch (fn [_ me newv _ _]
                                    (when-let [fts ^FlutterTts newv]
                                      (.setSharedInstance fts true)
+                                     (.setProgressHandler fts
+                                       (fn [text startOffset endOffset word]
+                                         (dp :progress! word :s startOffset :e endOffset)))
+                                     (.setCompletionHandler fts
+                                       (fn []
+                                         (with-mx-isolation ; NB!!
+                                           (dp :offset!!! (mset! (fm* :ctlz) :mode :off)))))
                                      (.setErrorHandler fts
                                        (fn [msg]
                                          (throw (Exception. (str "FlutterTts error: " msg)))))))]
@@ -42,13 +52,17 @@
      :pitch         (cI 1.0 :watch (fn [_ me new _ _]
                                      (.setPitch ^FlutterTts (mget me :fts) new)))
      ; -------------------------------------------------------------------------------
-     :lang-geo-tree (cF+ [:async? true
+     :lang-geo-tree (cF+ [:async? true ;; NB!! async handling
                           :async-then (fn [c lg-flat]
                                         (group-by lg-lang (sort lg-flat)))]
                       (.-getLanguages ^FlutterTts (mget me :fts)))
      :lg-pref       "en-AU"                                 ;; todo store as upref
      :lg-current    (cF+n [:watch (fn [_ me new prior _]
-                                    (do-speak me))]
+                                    (when (not= prior mx/unbound)
+                                      (mx/with-cc :auto-on
+                                        (dp :lg-current-sets-on)
+                                        (mset! (fm* :ctlz) :mode :on))
+                                      #_(do-speak me)))]
                       (mget me :lg-pref))}
     (scaffold
       {:appBar (app-bar {:title (m/Text "Flutter TTS Demo")})}
@@ -59,34 +73,72 @@
         (speaking-controls)
         (equalizer)))))
 
+;;; --- text input --------------------------------------------------------------
+
+(defn text-input []
+  (container
+    {:alignment m/Alignment.topCenter
+     :padding   (m/EdgeInsets.only
+                  .top 25.0 .left 25.0 .right 25.0 .bottom 9)}
+    (fx/text-field
+      {:controller (cFonce                                  ;; provides access to 'me'
+                     (m/TextEditingController .text (mget me :value)))
+       :onChanged  (as-dart-callback [text]
+                     (mset! me :value text))
+       :minLines   6 :maxLines 11}
+      {:name  :text-in
+       :value (cI (str                                      ;"Turning and turning in the widening gyre\n"
+                    ;"The falcon cannot hear the falconer;\n"
+                    ;"Things fall apart; the centre cannot hold;\n"
+                    "Mere anarchy is loosed upon the world,")
+                #_(str
+                    "\"Jealousy\"\nby Robert Graves\n\n"
+                    "I'd die for you, or you for me, \n"
+                    "So furious is our jealousy-- \n"
+                    "And if you doubt this to be true, \n"
+                    "Kill me outright, lest I kill you."
+                    ))})))
+
 ;;; --- play, stop, pause -------------------------------------------------------
 
 
 ;; todo if user changes volume et al while paused, warn that it will not take effect until fresh play
 
-(defn speaking-control [color splash-color icon label func]
+(defn speaking-control [color splash-color icon label func mode]
   (column
     {:mainAxisSize      m/MainAxisSize.min
      :mainAxisAlignment m/MainAxisAlignment.center}
     (icon-button
-      {:icon        (fx/icon {:icon icon})
+      {:key         (m/ValueKey mode)
+       :icon        (fx/icon {:icon icon})
+       :iconSize    48
        :color       color
        :splashColor splash-color
-       :onPressed   (fn [] (func me))})))
+       :onPressed   (as-dart-callback []                    ;; NB!
+                      (mset! (fasc :ctlz) :mode mode))})))
 
 (defn speaking-controls []
   (container
-    {:padding    (m/EdgeInsets.only .top 8 .bottom 8)}
+    {:padding (m/EdgeInsets.only .top 8 .bottom 8)}
+    {:name :ctlz
+     :mode (cI :off :watch (fn [_ me new-mode _ _]
+                             ((case new-mode
+                                :off do-stop
+                                :on do-speak
+                                :pause do-pause) me)))}
     (row
       {:mainAxisAlignment m/MainAxisAlignment.spaceEvenly}
-      (speaking-control m/Colors.green m/Colors.greenAccent m/Icons.play_arrow "PLAY" do-speak)
-      (speaking-control m/Colors.red m/Colors.redAccent m/Icons.stop "STOP" do-stop)
-      (speaking-control m/Colors.blue m/Colors.blueAccent m/Icons.pause "PAUSE" do-pause))))
+      (if (some #{(mget (fasc :ctlz) :mode)} [:off :pause])
+        (speaking-control m/Colors.green m/Colors.greenAccent m/Icons.play_arrow "PLAY" do-speak :on)
+        (speaking-control m/Colors.blue m/Colors.blueAccent m/Icons.pause "PAUSE" do-pause :pause))
+      (fx/opacity {:opacity (cF (if (some #{(mget (fasc :ctlz) :mode)} [:on :pause])
+                                  1.0 0.0))}
+        (speaking-control m/Colors.red m/Colors.redAccent m/Icons.stop "STOP" do-stop :off)))))
 
 ;;; --- speech control actions -----------------------------------------------
 
 (defn do-speak [me]
-  (let [app (myapp) ;(mx/fascinc :app)
+  (let [app (fasc :app)
         fts ^FlutterTts (mget app :fts)
         speech (mget (mx/fm* :text-in) :value)
         lang (maprop :lg-current)]
@@ -171,8 +223,8 @@
                      {:border (cF (when (= lang (lg-lang (maprop :lg-current)))
                                     (.all m/Border .color m/Colors.blue .width 2)))
                       :color  (.-shade50 (cond
-                                            (even? i) m/Colors.blue
-                                            :else m/Colors.yellow))}
+                                           (even? i) m/Colors.blue
+                                           :else m/Colors.yellow))}
                      {:unwrapped? true})}
       {:name :lang-cont}
       (center
@@ -194,7 +246,7 @@
                       :color  (.-shade50 (cond
                                            (even? i) m/Colors.blue
                                            :else m/Colors.yellow))}
-                     {:unwrapped? true})}
+                     #_ {:unwrapped? false})}
       {:name :geo-cont}
       (center
         (padding {:padding (m/EdgeInsets.all 4.0)}
@@ -202,32 +254,6 @@
             {:style (p/TextStyle .color m/Colors.black
                       .fontSize 16.0)}
             (subs lang-geo 3)))))))
-
-;;; --- text input --------------------------------------------------------------
-
-(defn text-input []
-  (container
-    {:alignment m/Alignment.topCenter
-     :padding   (m/EdgeInsets.only
-                  .top 25.0 .left 25.0 .right 25.0 .bottom 9)}
-    (fx/text-field
-      {:controller (cFonce
-                     (m/TextEditingController .text (mget me :value)))
-       :onChanged  (as-dart-callback [text]
-                     (mset! me :value text))
-       :minLines   6 :maxLines 11}
-      {:name  :text-in
-       :value (cI (str "Turning and turning in the widening gyre\n"
-                    "The falcon cannot hear the falconer;\n"
-                    "Things fall apart; the centre cannot hold;\n"
-                    "Mere anarchy is loosed upon the world,")
-                #_(str
-                    "\"Jealousy\"\nby Robert Graves\n\n"
-                    "I'd die for you, or you for me, \n"
-                    "So furious is our jealousy-- \n"
-                    "And if you doubt this to be true, \n"
-                    "Kill me outright, lest I kill you."
-                    ))})))
 
 ;;; --- utils -----------------------------
 

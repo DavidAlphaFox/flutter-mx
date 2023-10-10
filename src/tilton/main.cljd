@@ -41,6 +41,7 @@
 
 (defn main [] ;<id:1673573645>
   (cty/cells-reset)
+  (dp :cells-reset!!!)
   (md/md-quiesce-feature! true)
   (fx/widget-key-clear)
   (.ensureInitialized w/WidgetsFlutterBinding)
