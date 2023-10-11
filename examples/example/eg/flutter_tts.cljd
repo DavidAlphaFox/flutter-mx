@@ -30,23 +30,10 @@
     {:name          :app
      :fts           (cF+ [:watch app-fts-watch]
                       (FlutterTts))
-     :fts-state (cI :unknown
-                  :watch (fn [_ me new old c]
-                           (dp :FTS-state-now!!!!!!!!! new )))
 
-                                 ;(case new-state
-                                 ;  :started (mx/with-cc :wprog
-                                 ;             (mset! (fm* :word-now) :the-word ""))
-                                 ;  :stopped (mx/with-cc :wprog
-                                 ;             (mset! (fm* :word-now) :the-word "Fini!")))))
-      :speech-progress (cI nil
-                         :watch (fn [_ me new _ _]
-                                  (dp :progwatch (:word new))
-                                  (mx/with-cc :wprog
-                                    (mset! (fm* :word-now) :the-word
-                                      (:word new)))))
 
      ; ------------- settings ----------------------------
+     ; todo move closer to the controls
 
      :volume        (cI 0.3 :watch (fn [_ me new _ _]
                                      (.setVolume ^FlutterTts (mget me :fts) new)))
@@ -55,6 +42,9 @@
      :pitch         (cI 1.0 :watch (fn [_ me new _ _]
                                      (.setPitch ^FlutterTts (mget me :fts) new)))
      ; -------------------------------------------------------------------------------
+
+     ; todo move closer to lang/geo controls
+     
      :lang-geo-tree (cF+ [:async? true                      ;; NB!! async handling
                           :async-then (fn [c lg-flat]
                                         (group-by lg-lang (sort lg-flat)))]
@@ -62,9 +52,6 @@
      :lg-pref       "en-AU"                                 ;; todo store as upref
      :lg-current    (cF+n [:watch (fn [_ me new prior _]
                                     (when (not= prior mx/unbound)
-                                      #_(mx/with-cc :auto-on
-                                          (dp :lg-current-sets-on)
-                                          (mset! (fm* :ctlz) :mode :on))
                                       (do-speak me)))]
                       (mget me :lg-pref))}
     (scaffold
@@ -95,9 +82,10 @@
                      (mset! me :value text))
        :minLines   6 :maxLines 11}
       {:name  :text-in
-       :value (cI (str                                      ;"Turning and turning in the widening gyre\n"
-                    ;"The falcon cannot hear the falconer;\n"
-                    ;"Things fall apart; the centre cannot hold;\n"
+       :value (cI (str
+                    "Turning and turning in the widening gyre\n"
+                    "The falcon cannot hear the falconer;\n"
+                    "Things fall apart; the centre cannot hold;\n"
                     "Mere anarchy is loosed upon the world,")
                 #_(str
                     "\"Jealousy\"\nby Robert Graves\n\n"
@@ -127,12 +115,28 @@
 (defn speaking-controls []
   (container
     {:padding (m/EdgeInsets.only .top 8 .bottom 8)}
+    {:name :dash
+     :fts-state (cI :unknown
+                  :watch (fn [_ me new old c]
+                           (dp :FTS-state-now!!!!!!!!! new )))
+
+     ;(case new-state
+     ;  :started (mx/with-cc :wprog
+     ;             (mset! (fm* :word-now) :the-word ""))
+     ;  :stopped (mx/with-cc :wprog
+     ;             (mset! (fm* :word-now) :the-word "Fini!")))))
+     #_#_ :speech-progress (cI nil
+                        :watch (fn [_ me new _ _]
+                                 (dp :progwatch (:word new))
+                                 (mx/with-cc :wprog
+                                   (mset! (fm* :word-now) :the-word
+                                     (:word new)))))}
     (row
       {:mainAxisAlignment m/MainAxisAlignment.spaceEvenly}
-      (if (some #{(mget (fasc :app) :fts-state)} [:unknown :stopped :paused])
+      (if (some #{(mget (fmu :dash) :fts-state)} [:unknown :stopped :paused])
         (speaking-control m/Colors.green m/Colors.greenAccent m/Icons.play_arrow "PLAY" do-speak)
         (speaking-control m/Colors.blue m/Colors.blueAccent m/Icons.pause "PAUSE" do-pause))
-      (fx/opacity {:opacity (cF (if (some #{(mget (fasc :app) :fts-state)} [:stopped :unknown])
+      (fx/opacity {:opacity (cF (if (some #{(mget (fmu :dash) :fts-state)} [:stopped :unknown])
                                   0.0 1.0))}
         (speaking-control m/Colors.red m/Colors.redAccent m/Icons.stop "STOP" do-stop)))))
 
@@ -142,32 +146,33 @@
     (.setProgressHandler fts
       (fn [full-text word-start word-end word]
         (with-mx-isolation                                  ; NB!!
-          (mset! (fasc :app) :speech-progress
+          (mset! (fm* :dash) :speech-progress
             {full-text   full-text
              :word-start word-start
              :word-end   word-end
              :word       word}))))
     (.setStartHandler fts
       (fn []
-        (dp :starthandler!!?)
         (with-mx-isolation
           (dp :starthandler!!!!!!!!!!!)
-          (let [setv (mset! (fasc :app) :fts-state :started)]
+          (let [d (fm* :dash)
+                _ (dp :got-dash d)
+                setv (mset! d :fts-state :started)]
             (dp :here)
-            (dp :mset-started-sas setv (mget (fasc :app) :fts-state)))
+            (dp :mset-started-sas setv (mget d :fts-state)))
           )))
     (.setContinueHandler fts
       (fn []
         (with-mx-isolation
-          (mset! (fasc :app) :fts-state :continued))))
+          (mset! (fm* :dash) :fts-state :continued))))
     (.setPauseHandler fts
       (fn []
         (with-mx-isolation
-          (mset! (fasc :app) :fts-state :paused))))
+          (mset! (fm* :dash) :fts-state :paused))))
     (.setCompletionHandler fts
       (fn []
         (with-mx-isolation
-          (mset! (fasc :app) :fts-state :stopped))))
+          (mset! (fm* :dash) :fts-state :stopped))))
     (.setErrorHandler fts
       (fn [msg]
         (dp :errorhandler!!!!!!!!!!!)

@@ -77,6 +77,8 @@
 
 (defn mset! [me prop new-value]
   (chk me "no me passed to mset!")
+  (when (nil? me)
+    (mx-throw "MSET! passed nil me setting prop " prop))
   (chk (mref? me) (str "mset me not mref but: " (minfo me) "," prop))
   (if-let [c (md-cell me prop)]
     (do
