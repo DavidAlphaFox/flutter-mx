@@ -44,7 +44,7 @@
      ; -------------------------------------------------------------------------------
 
      ; todo move closer to lang/geo controls
-     
+
      :lang-geo-tree (cF+ [:async? true                      ;; NB!! async handling
                           :async-then (fn [c lg-flat]
                                         (group-by lg-lang (sort lg-flat)))]
@@ -56,17 +56,18 @@
                       (mget me :lg-pref))}
     (scaffold
       {:appBar (app-bar {:title (m/Text "Flutter TTS Demo")})}
-      (column
-        (section-header "Languages")
-        (lang-chooser)
-        (section-header "Geographic Region")
-        (geo-chooser)
-        (text-input)
-        (speaking-controls)
-        (fx/text {} {:name     :word-now
-                     :the-word (cI "RSN")}
-          (or (mget me :the-word) ""))
-        (equalizer)))))
+      (padding {:padding (m/EdgeInsets.all 28.0)}
+        (column
+          (section-header "Languages")
+          (lang-chooser)
+          (section-header "Geographic Region")
+          (geo-chooser)
+          (text-input)
+          (speaking-controls)
+          (fx/text {} {:name     :word-now
+                       :the-word (cI "RSN")}
+            (or (mget me :the-word) ""))
+          (equalizer))))))
 
 ;;; --- text input --------------------------------------------------------------
 
@@ -115,19 +116,18 @@
 (defn speaking-controls []
   (container
     {:padding (m/EdgeInsets.only .top 8 .bottom 8)}
-    {:name :dash
-     :fts-state (cI :unknown
-                  :watch (fn [_ me new old c]
-                           (dp :FTS-state-now!!!!!!!!! new )))
-
-     ;(case new-state
-     ;  :started (mx/with-cc :wprog
-     ;             (mset! (fm* :word-now) :the-word ""))
-     ;  :stopped (mx/with-cc :wprog
-     ;             (mset! (fm* :word-now) :the-word "Fini!")))))
-     #_#_ :speech-progress (cI nil
+    {:name            :dash
+     :fts-state       (cI :unknown
+                        :watch (fn [_ me new-state old c]
+                                 (dp :FTS-state-now!!!!!!!!! new-state)
+                                 (case new-state
+                                   :started (mx/with-cc :wprog
+                                              (mset! (fm* :word-now) :the-word ""))
+                                   :stopped (mx/with-cc :wprog
+                                              (mset! (fm* :word-now) :the-word "Fini!"))
+                                   (do))))
+     :speech-progress (cI nil
                         :watch (fn [_ me new _ _]
-                                 (dp :progwatch (:word new))
                                  (mx/with-cc :wprog
                                    (mset! (fm* :word-now) :the-word
                                      (:word new)))))}
