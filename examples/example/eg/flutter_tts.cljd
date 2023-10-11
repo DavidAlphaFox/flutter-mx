@@ -1,5 +1,6 @@
 (ns example.eg.flutter-tts
-  "Originally, a straught port of the `flutter_tts` package example https://github.com/dlutton/flutter_tts/blob/master/example/lib/main.dart"
+  "Originally, a straught port of the `flutter_tts` package
+   example https://github.com/dlutton/flutter_tts/blob/master/example/lib/main.dart"
   (:require
     ["package:flutter/material.dart" :as m]
     ["package:flutter/painting.dart" :as p]
@@ -17,33 +18,35 @@
 
 (declare lang-chooser
   geo-chooser
-  speaking-controls
+  speaking-controls app-fts-watch
   equalizer property-slider
   text-input
   do-speak
   lang-button geo-button
   lg-lang)
 
-(defmacro myapp []
-  `(mx/fascinc :app ~'me))
-
 (defn make-app []
   (material-app {}
     {:name          :app
-     :fts           (cF+ [:watch (fn [_ me newv _ _]
-                                   (when-let [fts ^FlutterTts newv]
-                                     (.setSharedInstance fts true)
-                                     (.setProgressHandler fts
-                                       (fn [text startOffset endOffset word]
-                                         (dp :progress! word :s startOffset :e endOffset)))
-                                     (.setCompletionHandler fts
-                                       (fn []
-                                         (with-mx-isolation ; NB!!
-                                           (dp :offset!!! (mset! (fm* :ctlz) :mode :off)))))
-                                     (.setErrorHandler fts
-                                       (fn [msg]
-                                         (throw (Exception. (str "FlutterTts error: " msg)))))))]
+     :fts           (cF+ [:watch app-fts-watch]
                       (FlutterTts))
+     :fts-state (cI :unknown
+                  :watch (fn [_ me new old c]
+                           (dp :FTS-state-now!!!!!!!!! new )))
+
+                                 ;(case new-state
+                                 ;  :started (mx/with-cc :wprog
+                                 ;             (mset! (fm* :word-now) :the-word ""))
+                                 ;  :stopped (mx/with-cc :wprog
+                                 ;             (mset! (fm* :word-now) :the-word "Fini!")))))
+      :speech-progress (cI nil
+                         :watch (fn [_ me new _ _]
+                                  (dp :progwatch (:word new))
+                                  (mx/with-cc :wprog
+                                    (mset! (fm* :word-now) :the-word
+                                      (:word new)))))
+
+     ; ------------- settings ----------------------------
 
      :volume        (cI 0.3 :watch (fn [_ me new _ _]
                                      (.setVolume ^FlutterTts (mget me :fts) new)))
@@ -52,25 +55,30 @@
      :pitch         (cI 1.0 :watch (fn [_ me new _ _]
                                      (.setPitch ^FlutterTts (mget me :fts) new)))
      ; -------------------------------------------------------------------------------
-     :lang-geo-tree (cF+ [:async? true ;; NB!! async handling
+     :lang-geo-tree (cF+ [:async? true                      ;; NB!! async handling
                           :async-then (fn [c lg-flat]
                                         (group-by lg-lang (sort lg-flat)))]
                       (.-getLanguages ^FlutterTts (mget me :fts)))
      :lg-pref       "en-AU"                                 ;; todo store as upref
      :lg-current    (cF+n [:watch (fn [_ me new prior _]
                                     (when (not= prior mx/unbound)
-                                      (mx/with-cc :auto-on
-                                        (dp :lg-current-sets-on)
-                                        (mset! (fm* :ctlz) :mode :on))
-                                      #_(do-speak me)))]
+                                      #_(mx/with-cc :auto-on
+                                          (dp :lg-current-sets-on)
+                                          (mset! (fm* :ctlz) :mode :on))
+                                      (do-speak me)))]
                       (mget me :lg-pref))}
     (scaffold
       {:appBar (app-bar {:title (m/Text "Flutter TTS Demo")})}
       (column
+        (section-header "Languages")
         (lang-chooser)
+        (section-header "Geographic Region")
         (geo-chooser)
         (text-input)
         (speaking-controls)
+        (fx/text {} {:name     :word-now
+                     :the-word (cI "RSN")}
+          (or (mget me :the-word) ""))
         (equalizer)))))
 
 ;;; --- text input --------------------------------------------------------------
@@ -104,60 +112,88 @@
 
 ;; todo if user changes volume et al while paused, warn that it will not take effect until fresh play
 
-(defn speaking-control [color splash-color icon label func mode]
+(defn speaking-control [color splash-color icon label func]
   (column
     {:mainAxisSize      m/MainAxisSize.min
      :mainAxisAlignment m/MainAxisAlignment.center}
     (icon-button
-      {:key         (m/ValueKey mode)
+      {:key         (m/ValueKey label)
        :icon        (fx/icon {:icon icon})
        :iconSize    48
        :color       color
        :splashColor splash-color
-       :onPressed   (as-dart-callback []                    ;; NB!
-                      (mset! (fasc :ctlz) :mode mode))})))
+       :onPressed   (fn [] (func me))})))
 
 (defn speaking-controls []
   (container
     {:padding (m/EdgeInsets.only .top 8 .bottom 8)}
-    {:name :ctlz
-     :mode (cI :off :watch (fn [_ me new-mode _ _]
-                             ((case new-mode
-                                :off do-stop
-                                :on do-speak
-                                :pause do-pause) me)))}
     (row
       {:mainAxisAlignment m/MainAxisAlignment.spaceEvenly}
-      (if (some #{(mget (fasc :ctlz) :mode)} [:off :pause])
-        (speaking-control m/Colors.green m/Colors.greenAccent m/Icons.play_arrow "PLAY" do-speak :on)
-        (speaking-control m/Colors.blue m/Colors.blueAccent m/Icons.pause "PAUSE" do-pause :pause))
-      (fx/opacity {:opacity (cF (if (some #{(mget (fasc :ctlz) :mode)} [:on :pause])
-                                  1.0 0.0))}
-        (speaking-control m/Colors.red m/Colors.redAccent m/Icons.stop "STOP" do-stop :off)))))
+      (if (some #{(mget (fasc :app) :fts-state)} [:unknown :stopped :paused])
+        (speaking-control m/Colors.green m/Colors.greenAccent m/Icons.play_arrow "PLAY" do-speak)
+        (speaking-control m/Colors.blue m/Colors.blueAccent m/Icons.pause "PAUSE" do-pause))
+      (fx/opacity {:opacity (cF (if (some #{(mget (fasc :app) :fts-state)} [:stopped :unknown])
+                                  0.0 1.0))}
+        (speaking-control m/Colors.red m/Colors.redAccent m/Icons.stop "STOP" do-stop)))))
+
+(defn app-fts-watch [_ me newv _ _]
+  (when-let [fts ^FlutterTts newv]
+    (.setSharedInstance fts true)
+    (.setProgressHandler fts
+      (fn [full-text word-start word-end word]
+        (with-mx-isolation                                  ; NB!!
+          (mset! (fasc :app) :speech-progress
+            {full-text   full-text
+             :word-start word-start
+             :word-end   word-end
+             :word       word}))))
+    (.setStartHandler fts
+      (fn []
+        (dp :starthandler!!?)
+        (with-mx-isolation
+          (dp :starthandler!!!!!!!!!!!)
+          (let [setv (mset! (fasc :app) :fts-state :started)]
+            (dp :here)
+            (dp :mset-started-sas setv (mget (fasc :app) :fts-state)))
+          )))
+    (.setContinueHandler fts
+      (fn []
+        (with-mx-isolation
+          (mset! (fasc :app) :fts-state :continued))))
+    (.setPauseHandler fts
+      (fn []
+        (with-mx-isolation
+          (mset! (fasc :app) :fts-state :paused))))
+    (.setCompletionHandler fts
+      (fn []
+        (with-mx-isolation
+          (mset! (fasc :app) :fts-state :stopped))))
+    (.setErrorHandler fts
+      (fn [msg]
+        (dp :errorhandler!!!!!!!!!!!)
+        (throw (Exception. (str "FlutterTts error: " msg)))))))
 
 ;;; --- speech control actions -----------------------------------------------
 
 (defn do-speak [me]
-  (let [app (fasc :app)
+  (let [app (mx/fascinc :app)
         fts ^FlutterTts (mget app :fts)
         speech (mget (mx/fm* :text-in) :value)
         lang (maprop :lg-current)]
     (when (and lang (not (str/blank? speech)))
-      (dp :speaking!!!!!!!! lang speech :params (mget app :speech-rate)
-        (mget app :pitch)
-        (mget app :volume))
+      (dp :speaking!!!!!!!! lang
+        :params (mget app :speech-rate) (mget app :pitch) (mget app :volume))
+      (dp :pitch!!!!!!! lang (mget app :pitch))
       (.setPitch fts (mget app :pitch))
       (.setVolume fts (mget app :volume))
       (.setLanguage fts lang)
       (.speak fts speech))))
 
 (defn do-pause [me]
-  (let [fts ^FlutterTts (mget (fasc :app) :fts)]
-    (await (.pause fts))))
+  (.pause ^FlutterTts (mget (fasc :app) :fts)))
 
 (defn do-stop [me]
-  (let [fts ^FlutterTts (mget (fasc :app) :fts)]
-    (await (.stop fts))))
+  (.stop ^FlutterTts (mget (fasc :app) :fts)))
 
 ;;; --- equalizer property sliders -----------------------------------------------------------
 
@@ -198,17 +234,14 @@
 
 (defn geo-chooser []
   (expanded
-    (column
-      (m/Text "Geography")
-      ;;(m/Text "bam") #_
-      (fx/grid-view+count
-        {:crossAxisCount  8 :crossAxisSpacing 4
-         :mainAxisSpacing 4 :childAspectRatio 1.0
-         :padding         (m/EdgeInsets.all 8)
-         :shrinkWrap      true}
-        (map-indexed geo-button
-          (when-let [lgc (lg-lang (maprop :lg-current))]
-            (get (maprop :lang-geo-tree) lgc)))))))
+    (fx/grid-view+count
+      {:crossAxisCount  8 :crossAxisSpacing 4
+       :mainAxisSpacing 4 :childAspectRatio 1.0
+       :padding         (m/EdgeInsets.all 8)
+       :shrinkWrap      true}
+      (map-indexed geo-button
+        (when-let [lgc (lg-lang (maprop :lg-current))]
+          (get (maprop :lang-geo-tree) lgc))))))
 
 ;;; --- lang and geo buttons ----------------------------------------------------
 
@@ -246,7 +279,7 @@
                       :color  (.-shade50 (cond
                                            (even? i) m/Colors.blue
                                            :else m/Colors.yellow))}
-                     #_ {:unwrapped? false})}
+                     #_{:unwrapped? false})}
       {:name :geo-cont}
       (center
         (padding {:padding (m/EdgeInsets.all 4.0)}
@@ -256,6 +289,10 @@
             (subs lang-geo 3)))))))
 
 ;;; --- utils -----------------------------
+(defn section-header [title]
+  (fx/padding
+    {:padding (m/EdgeInsets.all 9.0)}
+    (m/Text title)))
 
 (defn lg-lang [lg]
   (subs lg 0 2))
